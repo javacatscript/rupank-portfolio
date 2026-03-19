@@ -61,9 +61,15 @@ export default function Footer() {
     <footer className="bg-bg-card border-t border-terminal-white/10 py-6">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-terminal-green text-xs font-bold tracking-wider">
-            PORTFOLIO &copy; {new Date().getFullYear()}
-          </span>
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
+            <span className="text-terminal-green text-xs font-bold tracking-wider">
+              PORTFOLIO &copy; {new Date().getFullYear()}
+            </span>
+            <span className="text-terminal-muted/70 text-[10px] tracking-widest uppercase hidden sm:inline flex items-center gap-1">
+              Designed with Google Stitch
+              <span className="text-md px-1" aria-hidden="true">♥</span>
+            </span>
+          </div>
 
           <div className="flex items-center gap-6">
             <a
