@@ -27,7 +27,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <a href="#hero" className="text-terminal-green font-bold text-sm tracking-wider">
-            KINETIC_TERMINAL
+            _hellorupank
           </a>
 
           <div className="hidden md:flex items-center gap-6">

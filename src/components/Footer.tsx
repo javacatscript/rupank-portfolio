@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-terminal-green text-xs font-bold tracking-wider">
-            LEVEL 1 PORTFOLIO &copy; {new Date().getFullYear()}
+            PORTFOLIO &copy; {new Date().getFullYear()}
           </span>
 
           <div className="flex items-center gap-6">

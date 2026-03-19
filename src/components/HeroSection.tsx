@@ -46,10 +46,10 @@ export default function HeroSection() {
                 : "opacity-0 translate-y-4"
             }`}
           >
-            <h1 className="text-terminal-green text-center font-black text-5xl sm:text-7xl md:text-8xl lg:text-[128px] leading-none tracking-tighter uppercase text-glow">
-              <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-1 md:mb-2">
+            <h1 className="text-terminal-green text-center font-black text-5xl sm:text-7xl md:text-8xl lg:text-[128px] leading-none tracking-[0.025em] uppercase text-glow">
+              {/* <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-1 md:mb-2">
                 LEVEL 1
-              </span>
+              </span> */}
               RUPANK JOSHI
             </h1>
 

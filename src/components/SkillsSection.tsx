@@ -55,7 +55,7 @@ const coreAttributes = [
 ];
 
 const systemLog = [
-  "> Loading Rupank_Joshi.profile...",
+  "> Loading _hellorupank.profile...",
   "> [OK] React 18 & Next.js App Router",
   "> [OK] Core Web Vitals optimized",
   "> [OK] OpenAI API connection active",
@@ -79,7 +79,7 @@ export default function SkillsSection() {
             Technical_Manifest
           </h2>
           <p className="text-terminal-muted text-xs sm:text-sm mt-2 tracking-wider">
-            User_ID: RUPANK_JOSHI // Level: 3+ Frontend_Engineer
+            User_ID: _hellorupank // Level: 3+ Software_Engineer
           </p>
         </div>
 
