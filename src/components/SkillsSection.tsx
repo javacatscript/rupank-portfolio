@@ -14,24 +14,25 @@ interface Skill {
 
 const skills: Skill[] = [
   { name: "JS (ES6+)", level: "LVL. 99", category: ["languages"], icon: "{ }" },
-  { name: "React.js", level: "LVL. 98", category: ["frontend"], icon: "⚛" },
-  { name: "Next.js", level: "LVL. 94", category: ["frontend"], icon: "NX" },
-  { name: "TypeScript", level: "LVL. 95", category: ["languages"], icon: "TS" },
-  { name: "MUI", level: "LVL. 88", category: ["frontend"], icon: "UI" },
-  { name: "Tailwind CSS", level: "LVL. 92", category: ["frontend"], icon: "TW" },
+  { name: "React.js", level: "LVL. 97", category: ["frontend"], icon: "⚛" },
+  { name: "Next.js", level: "LVL. 95", category: ["frontend"], icon: "NX" },
   { name: "Redux", level: "LVL. 90", category: ["frontend"], icon: "RX" },
-  { name: "Python", level: "LVL. 80", category: ["languages"], icon: "PY" },
-  { name: "SQL", level: "LVL. 85", category: ["languages"], icon: "DB" },
-  { name: "Node.js", level: "LVL. 85", category: ["backend"], icon: "ND" },
+  { name: "TypeScript", level: "LVL. 93", category: ["languages"], icon: "TS" },
   { name: "REST APIs", level: "LVL. 90", category: ["backend"], icon: "AP" },
   { name: "GraphQL", level: "LVL. 82", category: ["backend"], icon: "GQ" },
+  { name: "Node.js", level: "LVL. 85", category: ["backend"], icon: "ND" },
+  { name: "MUI", level: "LVL. 90", category: ["frontend"], icon: "UI" },
+  { name: "Tailwind CSS", level: "LVL. 88", category: ["frontend"], icon: "TW" },
+  { name: "Python", level: "LVL. 80", category: ["languages"], icon: "PY" },
+  { name: "SQL", level: "LVL. 85", category: ["languages"], icon: "DB" },
   { name: "MongoDB", level: "LVL. 78", category: ["backend"], icon: "MG" },
   { name: "Web Vitals", level: "EPIC", category: ["perf_ai"], icon: "⚡" },
   { name: "AI/LLM", level: "NEW", category: ["perf_ai"], icon: "🤖" },
   { name: "Git", level: "LVL. 95", category: ["tools"], icon: "GT" },
-  // { name: "Docker", level: "LVL. 75", category: ["tools"], icon: "DK" },
-  { name: "CI/CD", level: "LVL. 85", category: ["tools"], icon: "▶" },
-  { name: "Figma", level: "LVL. 80", category: ["tools"], icon: "FG" },
+  { name: "CI/CD", level: "LVL. 80", category: ["tools"], icon: "▶" },
+  { name: "Figma", level: "LVL. 85", category: ["tools"], icon: "FG" },
+  { name: "Claude Code", level: "LVL. 95", category: ["tools"], icon: "CL" },
+  { name: "Cursor IDE", level: "LVL. 99", category: ["tools"], icon: "CI" },
 ];
 
 const categories: { id: SkillCategory; label: string; count: string }[] = [
@@ -44,7 +45,7 @@ const categories: { id: SkillCategory; label: string; count: string }[] = [
 ];
 
 const equippedGear = [
-  { name: "VS_CODE_ENGINE", type: "PRIMARY_TOOL" },
+  { name: "CURSOR_IDE", type: "PRIMARY_TOOL" },
   { name: "REST/GRAPHQL_LINK", type: "DATA_TRANSFER" },
   { name: "CI/CD_PIPELINE", type: "DEPLOY_SHIELD" },
 ];

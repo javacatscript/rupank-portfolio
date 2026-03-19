@@ -2,8 +2,17 @@
 
 import { useState, useEffect } from "react";
 
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 10; // r=10
+
+function fluctuate(base: number, min: number, max: number, step = 2): number {
+  const delta = (Math.random() - 0.45) * step * 2;
+  return Math.round(Math.min(max, Math.max(min, base + delta)));
+}
+
 export default function ContactSection() {
   const [uptime, setUptime] = useState("128:44:02");
+  const [memoryUtilization, setMemoryUtilization] = useState(42);
+  const [syncPercent, setSyncPercent] = useState(88);
 
   useEffect(() => {
     const [h, m, s] = uptime.split(":").map(Number);
@@ -19,6 +28,14 @@ export default function ContactSection() {
     }, 1000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMemoryUtilization((prev) => fluctuate(prev, 20, 60, 2.5));
+      setSyncPercent((prev) => fluctuate(prev, 80, 96, 2));
+    }, 2200);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -46,14 +63,14 @@ export default function ContactSection() {
                 Current Stats
               </h4>
               <div className="space-y-2">
-                <StatRow label="LOCATION:" value="SECTOR_7_CONTACT_HUB" />
+                <StatRow label="LOCATION:" value="NEW_DELHI" />
                 <StatRow label="UPTIME:" value={uptime} />
-                <StatRow label="STATUS:" value="READY_TO_SAVE" />
+                <StatRow label="STATUS:" value="READY_TO_ENGAGE" />
               </div>
               <div className="mt-3 pt-3 border-t border-terminal-white/10">
                 <div className="border-t border-dashed border-terminal-white/10 pt-2">
                   <p className="text-[10px] text-terminal-muted tracking-wider">
-                    Memory Bank Utilization: 85%
+                    Memory Bank Utilization: {memoryUtilization}%
                   </p>
                 </div>
               </div>
@@ -68,7 +85,7 @@ export default function ContactSection() {
                   01.
                 </span>
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight text-glow-sm">
-                  Establish Connection
+                  Establish Contact
                 </h2>
               </div>
 
@@ -116,14 +133,18 @@ export default function ContactSection() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold tracking-wider">
-                        Resume_Artifact.v1
+                        Resume_Rupank.v1
                       </h4>
                       <p className="text-[10px] text-terminal-muted tracking-wider">
-                        Size: 4.2MB // Format: PDF_PORTFOLIO
+                        Size: 143KB // Format: PDF
                       </p>
                     </div>
                   </div>
-                  <button className="border border-terminal-white/20 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-terminal-green hover:text-terminal-green transition-all flex items-center gap-2">
+                  <a
+                    href="/resume.pdf"
+                    download="Rupank_Joshi_Resume.pdf"
+                    className="border border-terminal-white/20 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-terminal-green hover:text-terminal-green transition-all flex items-center gap-2 shrink-0"
+                  >
                     <svg
                       width="12"
                       height="12"
@@ -138,7 +159,7 @@ export default function ContactSection() {
                       />
                     </svg>
                     INITIATE_DOWNLOAD
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -162,14 +183,14 @@ export default function ContactSection() {
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  strokeDasharray="56.5"
-                  strokeDashoffset="6.8"
+                  strokeDasharray={CIRCLE_CIRCUMFERENCE}
+                  strokeDashoffset={CIRCLE_CIRCUMFERENCE * (1 - syncPercent / 100)}
                   transform="rotate(-90 12 12)"
                 />
               </svg>
             </div>
-            <span className="text-xs font-bold text-terminal-green">
-              88% SYNC
+            <span className="text-xs font-bold text-terminal-green tabular-nums">
+              {syncPercent}% SYNC
             </span>
           </div>
         </div>
