@@ -1,4 +1,62 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+function formatCoord(value: number, isLat: boolean): string {
+  const abs = Math.abs(value);
+  const dir = isLat ? (value >= 0 ? "N" : "S") : (value >= 0 ? "E" : "W");
+  return `${abs.toFixed(4)}° ${dir}`;
+}
+
 export default function Footer() {
+  const [location, setLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      setLocationError("unavailable");
+      return;
+    }
+
+    const onSuccess = (position: GeolocationPosition) => {
+      setLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      setLocationError(null);
+    };
+
+    const onError = () => {
+      setLocationError("denied");
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      maximumAge: 60000,
+      timeout: 10000,
+    });
+
+    const watchId = navigator.geolocation.watchPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      maximumAge: 30000,
+      timeout: 10000,
+    });
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  const locationText =
+    location != null
+      ? `LOC: ${formatCoord(location.lat, true)}, ${formatCoord(location.lng, false)}`
+      : locationError === "denied"
+        ? "LOC: permission denied"
+        : locationError === "unavailable"
+          ? "LOC: unavailable"
+          : "LOC: acquiring...";
+
   return (
     <footer className="bg-bg-card border-t border-terminal-white/10 py-6">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,8 +86,8 @@ export default function Footer() {
             </a>
           </div>
 
-          <span className="text-terminal-muted text-xs tracking-wider hidden sm:block">
-            LOC: 34.0522&deg; N, 118.2437&deg; W
+          <span className="text-terminal-muted text-xs tracking-wider hidden sm:block tabular-nums">
+            {locationText}
           </span>
         </div>
       </div>
