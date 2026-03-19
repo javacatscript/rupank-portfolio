@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RUPANK JOSHI | KINETIC_TERMINAL",
+  title: "_hellorupank",
   description:
     "Frontend Engineer with 3+ years of experience. Building high-fidelity experiences through low-fidelity constraints.",
 };
