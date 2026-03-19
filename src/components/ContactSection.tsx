@@ -212,7 +212,7 @@ function ContactForm() {
         </label>
         <div className="flex items-center border-b border-terminal-white/20">
           <span className="text-xs text-terminal-muted pr-2 shrink-0">
-            guest@kinetic:~$
+            guest@_hellorupank:~$
           </span>
           <input
             type="text"
