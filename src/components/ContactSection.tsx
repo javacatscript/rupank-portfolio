@@ -208,21 +208,79 @@ function StatRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim()) && email.trim().length <= 254;
+}
+
 function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+
+    if (!formData.name.trim()) {
+      setStatus("error");
+      setErrorMessage("Name is required.");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setStatus("error");
+      setErrorMessage("Email is required.");
+      return;
+    }
+    if (!isValidEmail(formData.email)) {
+      setStatus("error");
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    if (!formData.message.trim()) {
+      setStatus("error");
+      setErrorMessage("Message is required.");
+      return;
+    }
+
     setStatus("sending");
-    setTimeout(() => {
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          message: formData.message.trim(),
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setStatus("error");
+        setErrorMessage(
+          data.error || res.status === 503
+            ? "Email service is not configured. Try again later."
+            : "Failed to send. Try again."
+        );
+        return;
+      }
+
       setStatus("sent");
-      setTimeout(() => setStatus("idle"), 3000);
-    }, 1500);
+      setFormData({ name: "", email: "", message: "" });
+      setTimeout(() => setStatus("idle"), 4000);
+    } catch {
+      setStatus("error");
+      setErrorMessage("Network error. Check connection and try again.");
+    }
   };
 
   return (
@@ -289,6 +347,12 @@ function ContactForm() {
         </div>
       </div>
 
+      {errorMessage && (
+        <p className="text-red-400 text-xs tracking-wider">
+          {errorMessage}
+        </p>
+      )}
+
       <button
         type="submit"
         disabled={status === "sending"}
@@ -297,6 +361,7 @@ function ContactForm() {
         {status === "idle" && "UPLOAD_TRANSMISSION"}
         {status === "sending" && "TRANSMITTING..."}
         {status === "sent" && "✓ TRANSMISSION_COMPLETE"}
+        {status === "error" && "RETRY_TRANSMISSION"}
       </button>
     </form>
   );
