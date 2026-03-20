@@ -14,7 +14,7 @@ const quests: Quest[] = [
   {
     status: "active",
     title: "Software Engineer Frontend",
-    company: "MiM-Essay // Kraya AI",
+    company: "Kraya AI",
     period: "Apr 2023 - PRESENT",
     description:
       "Leading development of a modular frontend architecture using React, Next.js (App Router), and TypeScript. Achieved a 40% improvement in Core Web Vitals (notably LCP and INP) through optimized SSR/SSG strategies.",
