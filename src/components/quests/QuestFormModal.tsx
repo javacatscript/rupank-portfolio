@@ -8,7 +8,7 @@ interface QuestFormModalProps {
   mode: "add" | "edit";
   initialData?: Quest;
   onClose: () => void;
-  onSave: (data: QuestFormData, id?: string) => void;
+  onSave: (data: QuestFormData, id?: string) => void | Promise<void>;
 }
 
 const inputClass =
@@ -65,7 +65,7 @@ export default function QuestFormModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const title = form.title.trim();
@@ -78,7 +78,7 @@ export default function QuestFormModal({
       return;
     }
 
-    onSave(
+    await onSave(
       {
         status: form.status,
         title,

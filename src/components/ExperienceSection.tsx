@@ -5,8 +5,12 @@ import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import QuestFormModal from "@/components/quests/QuestFormModal";
 import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
-import { INITIAL_QUESTS } from "@/data/initialQuests";
-import { createQuestId, loadQuests, saveQuests } from "@/lib/questsStorage";
+import {
+  createQuestApi,
+  deleteQuestApi,
+  fetchQuests,
+  updateQuestApi,
+} from "@/lib/portfolioApi";
 import type { Quest, QuestFormData } from "@/types/quest";
 
 const skillTree = [
@@ -16,18 +20,30 @@ const skillTree = [
 
 export default function ExperienceSection() {
   const { isAdmin, requireAdmin } = usePortfolioAdmin();
-  const [quests, setQuests] = useState<Quest[]>(() =>
-    typeof window === "undefined" ? INITIAL_QUESTS : loadQuests()
-  );
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [editingQuest, setEditingQuest] = useState<Quest | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Quest | null>(null);
 
-  const persistQuests = useCallback((nextQuests: Quest[]) => {
-    setQuests(nextQuests);
-    saveQuests(nextQuests);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const data = await fetchQuests();
+      setQuests(data);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to load quests");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const openAddForm = () => {
     setFormMode("add");
@@ -45,22 +61,28 @@ export default function ExperienceSection() {
   const handleDeleteRequest = (quest: Quest) =>
     requireAdmin(() => setDeleteTarget(quest));
 
-  const handleSaveQuest = (data: QuestFormData, id?: string) => {
-    if (id) {
-      persistQuests(
-        quests.map((quest) => (quest.id === id ? { ...quest, ...data, id } : quest))
-      );
-      return;
+  const handleSaveQuest = async (data: QuestFormData, id?: string) => {
+    try {
+      if (id) {
+        await updateQuestApi(id, data);
+      } else {
+        await createQuestApi(data);
+      }
+      await loadData();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to save quest");
     }
-
-    const newQuest: Quest = { id: createQuestId(), ...data };
-    persistQuests([newQuest, ...quests]);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    persistQuests(quests.filter((quest) => quest.id !== deleteTarget.id));
-    setDeleteTarget(null);
+    try {
+      await deleteQuestApi(deleteTarget.id);
+      setDeleteTarget(null);
+      await loadData();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to delete quest");
+    }
   };
 
   return (
@@ -78,7 +100,7 @@ export default function ExperienceSection() {
             <AdminSectionToolbar
               addLabel="+ NEW QUEST"
               onAdd={openAddForm}
-              meta={`Quest Count: ${String(quests.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"}`}
+              meta={`Quest Count: ${String(quests.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"} · Sync: Supabase`}
             />
           </div>
 
@@ -87,6 +109,17 @@ export default function ExperienceSection() {
           </p>
         </div>
 
+        {loadError && (
+          <p className="text-accent-red text-xs tracking-wider border border-accent-red/30 bg-accent-red/10 px-3 py-2 mb-6">
+            {loadError}
+          </p>
+        )}
+
+        {isLoading ? (
+          <p className="text-terminal-muted text-sm tracking-wider animate-blink mb-8">
+            Loading quest log...
+          </p>
+        ) : (
         <div className="relative">
           <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-terminal-white/10" />
 
@@ -111,6 +144,7 @@ export default function ExperienceSection() {
             </div>
           )}
         </div>
+        )}
 
         <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
           <SkillTreeTeaser />
@@ -132,7 +166,9 @@ export default function ExperienceSection() {
         isOpen={Boolean(deleteTarget)}
         title="DELETE_QUEST_ENTRY?"
         itemName={deleteTarget ? `${deleteTarget.title} @ ${deleteTarget.company}` : ""}
-        onConfirm={confirmDelete}
+        onConfirm={() => {
+          void confirmDelete();
+        }}
         onClose={() => setDeleteTarget(null)}
       />
     </section>

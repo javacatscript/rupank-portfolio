@@ -1,13 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import SkillFormModal from "@/components/skills/SkillFormModal";
 import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
-import { INITIAL_SKILLS } from "@/data/initialSkills";
 import { getSkillCategoryFilters } from "@/lib/skillCategories";
-import { createSkillId, loadSkills, saveSkills } from "@/lib/skillsStorage";
+import {
+  createSkillApi,
+  deleteSkillApi,
+  fetchSkills,
+  updateSkillApi,
+} from "@/lib/portfolioApi";
 import type { Skill, SkillFilterCategory, SkillFormData } from "@/types/skill";
 
 const equippedGear = [
@@ -31,9 +35,9 @@ const systemLog = [
 
 export default function SkillsSection() {
   const { isAdmin, requireAdmin } = usePortfolioAdmin();
-  const [skills, setSkills] = useState<Skill[]>(() =>
-    typeof window === "undefined" ? INITIAL_SKILLS : loadSkills()
-  );
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [activeCategory, setActiveCategory] = useState<SkillFilterCategory>("all");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -41,17 +45,29 @@ export default function SkillsSection() {
   const [editingSkill, setEditingSkill] = useState<Skill | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
 
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const data = await fetchSkills();
+      setSkills(data);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to load skills");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
   const categories = useMemo(() => getSkillCategoryFilters(skills), [skills]);
 
   const filteredSkills =
     activeCategory === "all"
       ? skills
       : skills.filter((skill) => skill.category.includes(activeCategory));
-
-  const persistSkills = useCallback((nextSkills: Skill[]) => {
-    setSkills(nextSkills);
-    saveSkills(nextSkills);
-  }, []);
 
   const openAddForm = () => {
     setFormMode("add");
@@ -70,26 +86,32 @@ export default function SkillsSection() {
   const handleDeleteRequest = (skill: Skill) =>
     requireAdmin(() => setDeleteTarget(skill));
 
-  const handleSaveSkill = (data: SkillFormData, id?: string) => {
-    if (id) {
-      persistSkills(
-        skills.map((skill) => (skill.id === id ? { ...skill, ...data, id } : skill))
-      );
-      if (selectedSkill?.id === id) {
+  const handleSaveSkill = async (data: SkillFormData, id?: string) => {
+    try {
+      if (id) {
+        await updateSkillApi(id, data);
+      } else {
+        await createSkillApi(data);
+      }
+      await loadData();
+      if (id && selectedSkill?.id === id) {
         setSelectedSkill({ id, ...data });
       }
-      return;
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to save skill");
     }
-
-    const newSkill: Skill = { id: createSkillId(), ...data };
-    persistSkills([newSkill, ...skills]);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    persistSkills(skills.filter((skill) => skill.id !== deleteTarget.id));
-    if (selectedSkill?.id === deleteTarget.id) setSelectedSkill(null);
-    setDeleteTarget(null);
+    try {
+      await deleteSkillApi(deleteTarget.id);
+      if (selectedSkill?.id === deleteTarget.id) setSelectedSkill(null);
+      setDeleteTarget(null);
+      await loadData();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to delete skill");
+    }
   };
 
   return (
@@ -108,10 +130,21 @@ export default function SkillsSection() {
           <AdminSectionToolbar
             addLabel="+ NEW SKILL"
             onAdd={openAddForm}
-            meta={`Skill Count: ${String(skills.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"}`}
+            meta={`Skill Count: ${String(skills.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"} · Sync: Supabase`}
           />
         </div>
 
+        {loadError && (
+          <p className="text-accent-red text-xs tracking-wider border border-accent-red/30 bg-accent-red/10 px-3 py-2 mb-6">
+            {loadError}
+          </p>
+        )}
+
+        {isLoading ? (
+          <p className="text-terminal-muted text-sm tracking-wider animate-blink mb-8">
+            Loading technical manifest...
+          </p>
+        ) : (
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           <div className="lg:w-56 shrink-0 space-y-6">
             <div className="bg-bg-card p-4 box-retro">
@@ -301,6 +334,7 @@ export default function SkillsSection() {
             </button>
           </div>
         </div>
+        )}
       </div>
 
       <SkillFormModal
@@ -316,7 +350,9 @@ export default function SkillsSection() {
         isOpen={Boolean(deleteTarget)}
         title="DELETE_SKILL_ENTRY?"
         itemName={deleteTarget?.name ?? ""}
-        onConfirm={confirmDelete}
+        onConfirm={() => {
+          void confirmDelete();
+        }}
         onClose={() => setDeleteTarget(null)}
       />
     </section>

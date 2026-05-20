@@ -4,22 +4,24 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import AuthModal from "@/components/projects/AuthModal";
 import {
+  checkAdminSession,
   clearAuthSession,
-  isProjectsAdmin,
+  isClientAdminFlagSet,
 } from "@/lib/projectsAuth";
 
 interface PortfolioAdminContextValue {
   isAdmin: boolean;
   requireAdmin: (action: () => void) => void;
   openAuthLogin: () => void;
-  lockSession: () => void;
-  refreshAdminState: () => void;
+  lockSession: () => Promise<void>;
+  refreshAdminState: () => Promise<void>;
 }
 
 const PortfolioAdminContext = createContext<PortfolioAdminContextValue | null>(
@@ -31,15 +33,30 @@ export function PortfolioAdminProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isAdmin, setIsAdmin] = useState(() =>
-    typeof window === "undefined" ? false : isProjectsAdmin()
-  );
+  const [isAdmin, setIsAdmin] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authTitle, setAuthTitle] = useState("ADMIN_ACCESS_REQUIRED");
   const pendingActionRef = useRef<(() => void) | null>(null);
 
-  const refreshAdminState = useCallback(() => {
-    setIsAdmin(isProjectsAdmin());
+  const refreshAdminState = useCallback(async () => {
+    const sessionActive = await checkAdminSession();
+    setIsAdmin(sessionActive);
+    if (!sessionActive) {
+      clearAuthSession();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isClientAdminFlagSet()) return;
+
+    let cancelled = false;
+    void checkAdminSession().then((sessionActive) => {
+      if (!cancelled) setIsAdmin(sessionActive);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const runPendingAction = useCallback(() => {
@@ -61,21 +78,24 @@ export function PortfolioAdminProvider({
 
   const requireAdmin = useCallback(
     (action: () => void, title = "ADMIN_ACCESS_REQUIRED") => {
-      if (isProjectsAdmin()) {
-        setIsAdmin(true);
-        action();
-        return;
-      }
+      void (async () => {
+        const sessionActive = isAdmin || (await checkAdminSession());
+        if (sessionActive) {
+          setIsAdmin(true);
+          action();
+          return;
+        }
 
-      pendingActionRef.current = action;
-      setAuthTitle(title);
-      setAuthModalOpen(true);
+        pendingActionRef.current = action;
+        setAuthTitle(title);
+        setAuthModalOpen(true);
+      })();
     },
-    []
+    [isAdmin]
   );
 
-  const lockSession = useCallback(() => {
-    clearAuthSession();
+  const lockSession = useCallback(async () => {
+    await clearAuthSession();
     setIsAdmin(false);
     pendingActionRef.current = null;
   }, []);

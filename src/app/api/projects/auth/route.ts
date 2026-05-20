@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  ADMIN_COOKIE_NAME,
+  adminCookieOptions,
+  createAdminSessionToken,
+} from "@/lib/adminSession";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +20,7 @@ export async function POST(request: Request) {
     const adminKey = process.env.PROJECTS_ADMIN_KEY;
 
     if (!adminKey) {
-      console.error("[projects/auth] PROJECTS_ADMIN_KEY is not set");
+      console.error("[auth] PROJECTS_ADMIN_KEY is not set");
       return NextResponse.json(
         { authorized: false, error: "Admin access is not configured" },
         { status: 503 }
@@ -29,9 +34,12 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ authorized: true });
+    const token = createAdminSessionToken();
+    const response = NextResponse.json({ authorized: true });
+    response.cookies.set(ADMIN_COOKIE_NAME, token, adminCookieOptions());
+    return response;
   } catch (err) {
-    console.error("[projects/auth] Error:", err);
+    console.error("[auth] Error:", err);
     return NextResponse.json(
       { authorized: false, error: "Authentication failed" },
       { status: 500 }

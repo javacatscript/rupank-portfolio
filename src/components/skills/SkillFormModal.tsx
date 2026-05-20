@@ -8,7 +8,7 @@ interface SkillFormModalProps {
   mode: "add" | "edit";
   initialData?: Skill;
   onClose: () => void;
-  onSave: (data: SkillFormData, id?: string) => void;
+  onSave: (data: SkillFormData, id?: string) => void | Promise<void>;
 }
 
 const inputClass =
@@ -83,7 +83,7 @@ export default function SkillFormModal({
     });
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -95,7 +95,7 @@ export default function SkillFormModal({
       return;
     }
 
-    onSave(
+    await onSave(
       {
         name,
         level,

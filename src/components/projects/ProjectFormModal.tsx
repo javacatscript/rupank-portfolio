@@ -8,7 +8,7 @@ interface ProjectFormModalProps {
   mode: "add" | "edit";
   initialData?: Project;
   onClose: () => void;
-  onSave: (data: ProjectFormData, id?: string) => void;
+  onSave: (data: ProjectFormData, id?: string) => void | Promise<void>;
 }
 
 const inputClass =
@@ -71,7 +71,7 @@ export default function ProjectFormModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const title = form.title.trim();
@@ -86,7 +86,7 @@ export default function ProjectFormModal({
       return;
     }
 
-    onSave(
+    await onSave(
       {
         title,
         description,

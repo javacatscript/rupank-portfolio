@@ -1,33 +1,47 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ProjectCard from "@/components/projects/ProjectCard";
 import ProjectFormModal from "@/components/projects/ProjectFormModal";
 import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
-import { INITIAL_PROJECTS } from "@/data/initialProjects";
 import {
-  createProjectId,
-  loadProjects,
-  saveProjects,
-} from "@/lib/projectsStorage";
+  createProjectApi,
+  deleteProjectApi,
+  fetchProjects,
+  updateProjectApi,
+} from "@/lib/portfolioApi";
 import type { Project, ProjectFormData } from "@/types/project";
 
 export default function ProjectsSection() {
   const { isAdmin, requireAdmin } = usePortfolioAdmin();
-  const [projects, setProjects] = useState<Project[]>(() =>
-    typeof window === "undefined" ? INITIAL_PROJECTS : loadProjects()
-  );
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [editingProject, setEditingProject] = useState<Project | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
 
-  const persistProjects = useCallback((nextProjects: Project[]) => {
-    setProjects(nextProjects);
-    saveProjects(nextProjects);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+    try {
+      const data = await fetchProjects();
+      setProjects(data);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "Failed to load projects"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const openAddForm = () => {
     setFormMode("add");
@@ -47,28 +61,28 @@ export default function ProjectsSection() {
   const handleDeleteRequest = (project: Project) =>
     requireAdmin(() => setDeleteTarget(project));
 
-  const handleSaveProject = (data: ProjectFormData, id?: string) => {
-    if (id) {
-      persistProjects(
-        projects.map((project) =>
-          project.id === id ? { ...project, ...data, id } : project
-        )
-      );
-      return;
+  const handleSaveProject = async (data: ProjectFormData, id?: string) => {
+    try {
+      if (id) {
+        await updateProjectApi(id, data);
+      } else {
+        await createProjectApi(data);
+      }
+      await loadData();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to save project");
     }
-
-    const newProject: Project = {
-      id: createProjectId(),
-      ...data,
-    };
-
-    persistProjects([newProject, ...projects]);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    persistProjects(projects.filter((project) => project.id !== deleteTarget.id));
-    setDeleteTarget(null);
+    try {
+      await deleteProjectApi(deleteTarget.id);
+      setDeleteTarget(null);
+      await loadData();
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to delete project");
+    }
   };
 
   return (
@@ -86,28 +100,40 @@ export default function ProjectsSection() {
             <AdminSectionToolbar
               addLabel="+ NEW LOOT"
               onAdd={openAddForm}
-              meta={`Loot Count: ${String(projects.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"}`}
+              meta={`Loot Count: ${String(projects.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"} · Sync: Supabase`}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              index={index}
-              isAdmin={isAdmin}
-              onEdit={handleEdit}
-              onDelete={handleDeleteRequest}
-            />
-          ))}
-        </div>
+        {loadError && (
+          <p className="text-accent-red text-xs tracking-wider border border-accent-red/30 bg-accent-red/10 px-3 py-2 mb-6">
+            {loadError}
+          </p>
+        )}
 
-        {projects.length === 0 && (
+        {isLoading ? (
+          <p className="text-terminal-muted text-sm tracking-wider animate-blink">
+            Loading project archive...
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6">
+            {projects.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                index={index}
+                isAdmin={isAdmin}
+                onEdit={handleEdit}
+                onDelete={handleDeleteRequest}
+              />
+            ))}
+          </div>
+        )}
+
+        {!isLoading && projects.length === 0 && !loadError && (
           <div className="border border-terminal-white/10 bg-bg-card p-8 text-center box-retro">
             <p className="text-terminal-muted text-sm tracking-wider">
-              No projects loaded. Add your first loot entry in admin mode.
+              No projects in the archive yet.
             </p>
           </div>
         )}
@@ -127,7 +153,9 @@ export default function ProjectsSection() {
         title="DELETE_LOOT_ENTRY?"
         itemName={deleteTarget?.title ?? ""}
         description="Remove this entry from the archive. This cannot be undone."
-        onConfirm={confirmDelete}
+        onConfirm={() => {
+          void confirmDelete();
+        }}
         onClose={() => setDeleteTarget(null)}
       />
     </section>

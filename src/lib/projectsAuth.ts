@@ -1,53 +1,44 @@
-const AUTH_STORAGE_KEY = "rupank_projects_admin";
-const AUTH_DURATION_MS = 60 * 60 * 1000;
-
-interface AuthSession {
-  expiresAt: number;
-}
-
-export function getAuthSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-
-    const session = JSON.parse(raw) as AuthSession;
-    if (!session.expiresAt || Date.now() > session.expiresAt) {
-      clearAuthSession();
-      return null;
-    }
-
-    return session;
-  } catch {
-    return null;
-  }
-}
-
-export function isProjectsAdmin(): boolean {
-  return getAuthSession() !== null;
-}
-
-export function setAuthSession(): void {
-  const session: AuthSession = {
-    expiresAt: Date.now() + AUTH_DURATION_MS,
-  };
-  sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-}
-
-export function clearAuthSession(): void {
-  sessionStorage.removeItem(AUTH_STORAGE_KEY);
-}
+const AUTH_STORAGE_KEY = "rupank_portfolio_admin";
 
 export type AdminAuthResult =
   | { ok: true }
   | { ok: false; error: string };
+
+export function setClientAdminFlag(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(AUTH_STORAGE_KEY, "1");
+}
+
+export function clearClientAdminFlag(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+export function isClientAdminFlagSet(): boolean {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(AUTH_STORAGE_KEY) === "1";
+}
+
+export async function checkAdminSession(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/auth/session", {
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) return false;
+    const data = (await response.json()) as { isAdmin?: boolean };
+    return Boolean(data.isAdmin);
+  } catch {
+    return false;
+  }
+}
 
 export async function verifyAdminKey(key: string): Promise<AdminAuthResult> {
   try {
     const response = await fetch("/api/projects/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ key }),
     });
 
@@ -57,7 +48,7 @@ export async function verifyAdminKey(key: string): Promise<AdminAuthResult> {
     };
 
     if (response.ok && data.authorized) {
-      setAuthSession();
+      setClientAdminFlag();
       return { ok: true };
     }
 
@@ -81,4 +72,21 @@ export async function verifyAdminKey(key: string): Promise<AdminAuthResult> {
       error: "ACCESS_DENIED // Authentication service unavailable",
     };
   }
+}
+
+export async function clearAuthSession(): Promise<void> {
+  clearClientAdminFlag();
+  try {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // Ignore network errors during logout
+  }
+}
+
+/** @deprecated Use isClientAdminFlagSet or checkAdminSession */
+export function isProjectsAdmin(): boolean {
+  return isClientAdminFlagSet();
 }
