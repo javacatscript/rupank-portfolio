@@ -10,6 +10,7 @@ const navLinks = [
   { id: "start", label: "START", href: "#hero" },
   { id: "inventory", label: "INVENTORY", href: "#skills" },
   { id: "questlog", label: "QUEST LOG", href: "#experience" },
+  { id: "projects", label: "PROJECTS", href: "#projects" },
 ];
 
 export default function Navbar({ activeSection }: NavbarProps) {
@@ -19,6 +20,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
     if (activeSection === "hero") return "start";
     if (activeSection === "skills") return "inventory";
     if (activeSection === "experience") return "questlog";
+    if (activeSection === "projects") return "projects";
     return "start";
   };
 

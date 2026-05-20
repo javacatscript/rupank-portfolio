@@ -1,48 +1,14 @@
 "use client";
 
-import { useState } from "react";
-
-type SkillCategory = "all" | "languages" | "frontend" | "backend" | "perf_ai" | "tools";
-
-interface Skill {
-  name: string;
-  level: string;
-  category: SkillCategory[];
-  icon: string;
-  highlight?: boolean;
-}
-
-const skills: Skill[] = [
-  { name: "JS (ES6+)", level: "LVL. 99", category: ["languages"], icon: "{ }" },
-  { name: "React.js", level: "LVL. 97", category: ["frontend"], icon: "⚛" },
-  { name: "Next.js", level: "LVL. 95", category: ["frontend"], icon: "NX" },
-  { name: "Redux", level: "LVL. 90", category: ["frontend"], icon: "RX" },
-  { name: "TypeScript", level: "LVL. 93", category: ["languages"], icon: "TS" },
-  { name: "REST APIs", level: "LVL. 90", category: ["backend"], icon: "AP" },
-  { name: "GraphQL", level: "LVL. 82", category: ["backend"], icon: "GQ" },
-  { name: "Node.js", level: "LVL. 85", category: ["backend"], icon: "ND" },
-  { name: "MUI", level: "LVL. 90", category: ["frontend"], icon: "UI" },
-  { name: "Tailwind CSS", level: "LVL. 88", category: ["frontend"], icon: "TW" },
-  { name: "Python", level: "LVL. 80", category: ["languages"], icon: "PY" },
-  { name: "SQL", level: "LVL. 85", category: ["languages"], icon: "DB" },
-  { name: "MongoDB", level: "LVL. 78", category: ["backend"], icon: "MG" },
-  { name: "Web Vitals", level: "EPIC", category: ["perf_ai"], icon: "⚡" },
-  { name: "AI/LLM", level: "NEW", category: ["perf_ai"], icon: "🤖" },
-  { name: "Git", level: "LVL. 95", category: ["tools"], icon: "GT" },
-  { name: "CI/CD", level: "LVL. 80", category: ["tools"], icon: "▶" },
-  { name: "Figma", level: "LVL. 85", category: ["tools"], icon: "FG" },
-  { name: "Claude Code", level: "LVL. 95", category: ["tools"], icon: "CL" },
-  { name: "Cursor IDE", level: "LVL. 99", category: ["tools"], icon: "CI" },
-];
-
-const categories: { id: SkillCategory; label: string; count: string }[] = [
-  { id: "all", label: "ALL_ITEMS", count: "[19]" },
-  { id: "languages", label: "LANGUAGES", count: "[04]" },
-  { id: "frontend", label: "FRONTEND", count: "[05]" },
-  { id: "backend", label: "BACKEND_APIS", count: "[04]" },
-  { id: "perf_ai", label: "PERF_AI", count: "[02]" },
-  { id: "tools", label: "TOOLS", count: "[04]" },
-];
+import { useCallback, useMemo, useState } from "react";
+import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
+import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
+import SkillFormModal from "@/components/skills/SkillFormModal";
+import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
+import { INITIAL_SKILLS } from "@/data/initialSkills";
+import { getSkillCategoryFilters } from "@/lib/skillCategories";
+import { createSkillId, loadSkills, saveSkills } from "@/lib/skillsStorage";
+import type { Skill, SkillFilterCategory, SkillFormData } from "@/types/skill";
 
 const equippedGear = [
   { name: "CURSOR_IDE", type: "PRIMARY_TOOL" },
@@ -64,28 +30,89 @@ const systemLog = [
 ];
 
 export default function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<SkillCategory>("all");
+  const { isAdmin, requireAdmin } = usePortfolioAdmin();
+  const [skills, setSkills] = useState<Skill[]>(() =>
+    typeof window === "undefined" ? INITIAL_SKILLS : loadSkills()
+  );
+  const [activeCategory, setActiveCategory] = useState<SkillFilterCategory>("all");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [editingSkill, setEditingSkill] = useState<Skill | undefined>();
+  const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
+
+  const categories = useMemo(() => getSkillCategoryFilters(skills), [skills]);
 
   const filteredSkills =
     activeCategory === "all"
       ? skills
-      : skills.filter((s) => s.category.includes(activeCategory));
+      : skills.filter((skill) => skill.category.includes(activeCategory));
+
+  const persistSkills = useCallback((nextSkills: Skill[]) => {
+    setSkills(nextSkills);
+    saveSkills(nextSkills);
+  }, []);
+
+  const openAddForm = () => {
+    setFormMode("add");
+    setEditingSkill(undefined);
+    setFormModalOpen(true);
+  };
+
+  const openEditForm = (skill: Skill) => {
+    setFormMode("edit");
+    setEditingSkill(skill);
+    setFormModalOpen(true);
+  };
+
+  const handleAddClick = () => requireAdmin(openAddForm);
+  const handleEdit = (skill: Skill) => requireAdmin(() => openEditForm(skill));
+  const handleDeleteRequest = (skill: Skill) =>
+    requireAdmin(() => setDeleteTarget(skill));
+
+  const handleSaveSkill = (data: SkillFormData, id?: string) => {
+    if (id) {
+      persistSkills(
+        skills.map((skill) => (skill.id === id ? { ...skill, ...data, id } : skill))
+      );
+      if (selectedSkill?.id === id) {
+        setSelectedSkill({ id, ...data });
+      }
+      return;
+    }
+
+    const newSkill: Skill = { id: createSkillId(), ...data };
+    persistSkills([newSkill, ...skills]);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    persistSkills(skills.filter((skill) => skill.id !== deleteTarget.id));
+    if (selectedSkill?.id === deleteTarget.id) setSelectedSkill(null);
+    setDeleteTarget(null);
+  };
 
   return (
     <section id="skills" className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-b border-terminal-white/20 pb-6 mb-8 md:mb-12">
-          <h2 className="text-terminal-green text-2xl sm:text-3xl md:text-4xl font-bold tracking-wider uppercase">
-            Technical_Manifest
-          </h2>
-          <p className="text-terminal-muted text-xs sm:text-sm mt-2 tracking-wider">
-            User_ID: _hellorupank // Level: 3+ Software_Engineer
-          </p>
+        <div className="border-b border-terminal-white/20 pb-6 mb-8 md:mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-terminal-green text-2xl sm:text-3xl md:text-4xl font-bold tracking-wider uppercase">
+              Technical_Manifest
+            </h2>
+            <p className="text-terminal-muted text-xs sm:text-sm mt-2 tracking-wider">
+              User_ID: _hellorupank · Level: 3+ Software_Engineer
+            </p>
+          </div>
+
+          <AdminSectionToolbar
+            addLabel="+ NEW SKILL"
+            onAdd={openAddForm}
+            meta={`Skill Count: ${String(skills.length).padStart(2, "0")} · Access Level: ${isAdmin ? "WRITE_ENABLED" : "READ_ONLY"}`}
+          />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Left Sidebar */}
           <div className="lg:w-56 shrink-0 space-y-6">
             <div className="bg-bg-card p-4 box-retro">
               <h3 className="text-terminal-green text-xs font-bold uppercase tracking-wider pb-3 mb-3 border-b border-terminal-white/20">
@@ -139,54 +166,83 @@ export default function SkillsSection() {
             </div>
           </div>
 
-          {/* Main Grid */}
           <div className="flex-1">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {filteredSkills.map((skill) => (
-                <button
-                  key={skill.name}
-                  onClick={() =>
-                    setSelectedSkill(
-                      selectedSkill?.name === skill.name ? null : skill
-                    )
-                  }
-                  className={`group relative bg-bg-card border p-3 sm:p-4 flex flex-col items-center text-center transition-all duration-200 hover:border-terminal-green/60 ${
-                    selectedSkill?.name === skill.name
-                      ? "border-terminal-green bg-terminal-green/5"
-                      : skill.highlight
-                        ? "border-terminal-green/30"
-                        : "border-terminal-white/10"
-                  }`}
-                >
-                  <div className="text-xl sm:text-2xl mb-2 h-8 flex items-center justify-center text-terminal-green/70 group-hover:text-terminal-green transition-colors">
-                    {skill.icon}
-                  </div>
-                  <span className="text-xs text-terminal-muted tracking-wider mb-1 truncate w-full">
-                    {skill.name}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold tracking-widest ${
-                      skill.highlight
-                        ? "text-terminal-green text-glow-sm"
-                        : "text-terminal-green"
+                <div key={skill.id} className="relative group/skill">
+                  <button
+                    onClick={() =>
+                      setSelectedSkill(
+                        selectedSkill?.id === skill.id ? null : skill
+                      )
+                    }
+                    className={`w-full bg-bg-card border p-3 sm:p-4 flex flex-col items-center text-center transition-all duration-200 hover:border-terminal-green/60 ${
+                      selectedSkill?.id === skill.id
+                        ? "border-terminal-green bg-terminal-green/5"
+                        : skill.highlight
+                          ? "border-terminal-green/30"
+                          : "border-terminal-white/10"
                     }`}
                   >
-                    {skill.level}
-                  </span>
-                </button>
-              ))}
-              {[...Array(Math.max(0, 2))].map((_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="border border-dashed border-terminal-white/10 p-4 flex items-center justify-center"
-                >
-                  <span className="text-2xl text-terminal-white/10">+</span>
+                    <div className="text-xl sm:text-2xl mb-2 h-8 flex items-center justify-center text-terminal-green/70 group-hover/skill:text-terminal-green transition-colors">
+                      {skill.icon}
+                    </div>
+                    <span className="text-xs text-terminal-muted tracking-wider mb-1 truncate w-full">
+                      {skill.name}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold tracking-widest ${
+                        skill.highlight
+                          ? "text-terminal-green text-glow-sm"
+                          : "text-terminal-green"
+                      }`}
+                    >
+                      {skill.level}
+                    </span>
+                  </button>
+
+                  {isAdmin && (
+                    <div className="mt-1 flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(skill)}
+                        className="flex-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-1 border border-terminal-green/40 text-terminal-green hover:bg-terminal-green/10 transition-colors"
+                      >
+                        EDIT
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteRequest(skill)}
+                        className="flex-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-1 border border-accent-red/40 text-accent-red hover:bg-accent-red/10 transition-colors"
+                      >
+                        DEL
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
+
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={handleAddClick}
+                  className="border border-dashed border-terminal-green/30 p-4 flex flex-col items-center justify-center gap-1 hover:border-terminal-green/60 hover:bg-terminal-green/5 transition-all min-h-[108px]"
+                >
+                  <span className="text-2xl text-terminal-green">+</span>
+                  <span className="text-[9px] text-terminal-muted tracking-widest uppercase">
+                    Add Skill
+                  </span>
+                </button>
+              )}
             </div>
+
+            {filteredSkills.length === 0 && (
+              <p className="text-terminal-muted text-sm tracking-wider mt-4 text-center">
+                No skills in this category.
+              </p>
+            )}
           </div>
 
-          {/* Right Sidebar */}
           <div className="lg:w-64 shrink-0 space-y-6">
             <div className="bg-bg-card-alt border-l-2 border-terminal-white/20 p-4 box-retro">
               <h3 className="text-terminal-green text-xs font-bold uppercase tracking-wider mb-4">
@@ -194,10 +250,7 @@ export default function SkillsSection() {
               </h3>
               <div className="space-y-3">
                 {equippedGear.map((gear, i) => (
-                  <div
-                    key={gear.name}
-                    className="flex items-start gap-3"
-                  >
+                  <div key={gear.name} className="flex items-start gap-3">
                     <div
                       className={`w-8 h-8 shrink-0 flex items-center justify-center text-xs ${
                         i === 0
@@ -240,12 +293,32 @@ export default function SkillsSection() {
               </div>
             </div>
 
-            <button className="w-full bg-bg-card border border-terminal-white/10 py-2.5 text-terminal-green text-xs font-bold uppercase tracking-widest hover:bg-terminal-green/10 hover:border-terminal-green/30 transition-all duration-200">
+            <button
+              type="button"
+              className="w-full bg-bg-card border border-terminal-white/10 py-2.5 text-terminal-green text-xs font-bold uppercase tracking-widest hover:bg-terminal-green/10 hover:border-terminal-green/30 transition-all duration-200"
+            >
               SYNC_PORTFOLIO
             </button>
           </div>
         </div>
       </div>
+
+      <SkillFormModal
+        key={`${formMode}-${editingSkill?.id ?? "new"}-${formModalOpen}`}
+        isOpen={formModalOpen}
+        mode={formMode}
+        initialData={editingSkill}
+        onClose={() => setFormModalOpen(false)}
+        onSave={handleSaveSkill}
+      />
+
+      <DeleteConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title="DELETE_SKILL_ENTRY?"
+        itemName={deleteTarget?.name ?? ""}
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </section>
   );
 }
