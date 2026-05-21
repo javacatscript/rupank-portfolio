@@ -34,9 +34,34 @@ create table if not exists quests (
   created_at timestamptz not null default now()
 );
 
+create table if not exists site_content (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists projects_sort_order_idx on projects (sort_order);
 create index if not exists skills_sort_order_idx on skills (sort_order);
 create index if not exists quests_sort_order_idx on quests (sort_order);
+
+alter table site_content enable row level security;
+
+do $site_content_policy$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'site_content'
+      and policyname = 'Public read site_content'
+  ) then
+    create policy "Public read site_content"
+      on site_content for select
+      to anon, authenticated
+      using (true);
+  end if;
+end
+$site_content_policy$;
 
 -- Seed data (safe to re-run: clears then inserts defaults)
 truncate table projects, skills, quests;
@@ -73,4 +98,11 @@ insert into quests (id, status, title, company, period, description, sort_order)
   ('quest-kraya', 'active', 'Software Engineer Frontend', 'Kraya AI', 'Apr 2023 - PRESENT', 'Leading development of a modular frontend architecture using React, Next.js (App Router), and TypeScript. Achieved a 40% improvement in Core Web Vitals (notably LCP and INP) through optimized SSR/SSG strategies.', 0),
   ('quest-tongadive', 'completed', 'Frontend Engineer Intern', 'Tongadive', 'Marc 2023 - Apr 2023', 'Built a cross-platform healthcare dashboard using React, TypeScript, and Ionic, enabling real-time medical inventory tracking. Developed accessible UI components with semantic HTML and ARIA.', 1),
   ('quest-coding-ninjas', 'completed', 'React Teaching Assistant', 'Coding Ninjas', 'Dec 2022 - Apr 2023', 'Mentored students by resolving 300+ React and JavaScript queries, maintaining a 4.9/5 satisfaction rating. Conducted debugging sessions and code reviews to accelerate understanding of core frontend concepts.', 2);
+
+insert into site_content (key, value) values
+  ('hero', '{"name":"RUPANK JOSHI","tagline":"Frontend Engineer with 3+ years of experience. Analog ghosts in a digital machine. Building high-fidelity experiences through low-fidelity constraints."}'::jsonb),
+  ('equipped_gear', '[{"id":"gear-1","name":"CURSOR_IDE","type":"PRIMARY_TOOL","icon":"⚙"},{"id":"gear-2","name":"REST/GRAPHQL_LINK","type":"DATA_TRANSFER","icon":"⇄"},{"id":"gear-3","name":"CI/CD_PIPELINE","type":"DEPLOY_SHIELD","icon":"▶"}]'::jsonb),
+  ('system_log', '{"lines":["> Loading _hellorupank.profile...","> [OK] React 18 & Next.js App Router","> [OK] Core Web Vitals optimized","> [OK] OpenAI API connection active","> _"]}'::jsonb),
+  ('resume_archive', '{"title":"Resume_Rupank.v1","sizeLabel":"143KB","format":"PDF","downloadName":"Rupank_Joshi_Resume.pdf","fileUrl":"/resume.pdf"}'::jsonb)
+on conflict (key) do nothing;
   

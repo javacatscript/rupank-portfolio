@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import EditTrigger from "@/components/admin/EditTrigger";
+import HeroEditModal from "@/components/admin/HeroEditModal";
+import { useSiteContent } from "@/context/SiteContentContext";
 
 export default function HeroSection() {
+  const { content, updateContent } = useSiteContent();
   const [bootText, setBootText] = useState("");
   const [showContent, setShowContent] = useState(false);
+  const [heroEditOpen, setHeroEditOpen] = useState(false);
   const fullBootText = "SYSTEM BOOT SEQUENCING";
 
   useEffect(() => {
@@ -34,9 +39,7 @@ export default function HeroSection() {
             <span className="text-xs sm:text-sm font-bold tracking-[0.1em] uppercase">
               {bootText}
             </span>
-            <span className="animate-blink text-terminal-green text-sm">
-              ▋
-            </span>
+            <span className="animate-blink text-terminal-green text-sm">▋</span>
           </div>
 
           <div
@@ -46,19 +49,26 @@ export default function HeroSection() {
                 : "opacity-0 translate-y-4"
             }`}
           >
-            <h1 className="text-terminal-green text-center font-black text-5xl sm:text-7xl md:text-8xl lg:text-[128px] leading-none tracking-[0.025em] uppercase text-glow">
-              {/* <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-1 md:mb-2">
-                LEVEL 1
-              </span> */}
-              RUPANK JOSHI
-            </h1>
+            <div className="group/edit relative flex items-center justify-center gap-2 max-w-full">
+              <h1 className="text-terminal-green text-center font-black text-5xl sm:text-7xl md:text-8xl lg:text-[128px] leading-none tracking-[0.025em] text-glow">
+                {content.hero.name}
+              </h1>
+              <EditTrigger
+                label="hero name"
+                onEdit={() => setHeroEditOpen(true)}
+                className="absolute -right-9 top-1/2 -translate-y-1/2 md:static md:translate-y-0"
+              />
+            </div>
 
-            <div className="mt-4 max-w-[672px] opacity-90">
-              <p className="text-terminal-green text-sm sm:text-base md:text-xl font-bold uppercase tracking-wider text-center leading-relaxed">
-                Frontend Engineer with 3+ years of experience. Analog ghosts in
-                a digital machine. Building high-fidelity experiences through
-                low-fidelity constraints.
+            <div className="group/edit relative mt-4 max-w-[672px] opacity-90 flex items-start justify-center gap-2">
+              <p className="text-terminal-green text-sm sm:text-base md:text-xl font-bold tracking-wider text-center leading-relaxed flex-1">
+                {content.hero.tagline}
               </p>
+              <EditTrigger
+                label="hero tagline"
+                onEdit={() => setHeroEditOpen(true)}
+                className="mt-1 shrink-0"
+              />
             </div>
           </div>
         </div>
@@ -102,6 +112,16 @@ export default function HeroSection() {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg-primary to-transparent pointer-events-none z-10" />
+
+      <HeroEditModal
+        key={`hero-edit-${heroEditOpen}-${content.hero.name}`}
+        isOpen={heroEditOpen}
+        initial={content.hero}
+        onClose={() => setHeroEditOpen(false)}
+        onSave={async (data) => {
+          await updateContent("hero", data);
+        }}
+      />
     </section>
   );
 }
@@ -136,9 +156,7 @@ function StatusRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center">
       <span className="text-xs font-mono uppercase">{label}</span>
-      <span className="text-xs font-mono uppercase text-terminal-green">
-        {value}
-      </span>
+      <span className="text-xs font-mono uppercase text-terminal-green">{value}</span>
     </div>
   );
 }
@@ -150,12 +168,7 @@ function WorldMapPanel() {
         <h3 className="text-xs font-bold uppercase tracking-wider text-terminal-green">
           World Map
         </h3>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          className="text-terminal-green"
-        >
+        <svg width="12" height="12" viewBox="0 0 12 12" className="text-terminal-green">
           <rect
             x="1"
             y="1"
@@ -171,13 +184,15 @@ function WorldMapPanel() {
         <div className="aspect-video bg-terminal-green/5 rounded-sm flex items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-20">
             <div className="grid grid-cols-8 grid-rows-4 h-full w-full gap-px">
-              {[0.3,0.15,0.5,0.22,0.45,0.12,0.55,0.38,0.28,0.48,0.18,0.42,0.35,0.52,0.25,0.4,0.32,0.58,0.2,0.47,0.14,0.53,0.36,0.44,0.27,0.5,0.19,0.41,0.33,0.56,0.23,0.46].map((opacity, i) => (
-                <div
-                  key={i}
-                  className="bg-terminal-green/20"
-                  style={{ opacity }}
-                />
-              ))}
+              {[0.3, 0.15, 0.5, 0.22, 0.45, 0.12, 0.55, 0.38, 0.28, 0.48, 0.18, 0.42, 0.35, 0.52, 0.25, 0.4, 0.32, 0.58, 0.2, 0.47, 0.14, 0.53, 0.36, 0.44, 0.27, 0.5, 0.19, 0.41, 0.33, 0.56, 0.23, 0.46].map(
+                (opacity, i) => (
+                  <div
+                    key={i}
+                    className="bg-terminal-green/20"
+                    style={{ opacity }}
+                  />
+                )
+              )}
             </div>
           </div>
           <div className="absolute w-2 h-2 bg-terminal-green rounded-full animate-pulse top-1/3 left-2/3" />
@@ -207,25 +222,21 @@ function PlayerStatsPanel() {
         <h3 className="text-xs font-bold uppercase tracking-wider text-terminal-green">
           Player Stats
         </h3>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          className="text-terminal-green"
-        >
-          <polygon points="6,1 11,11 1,11" fill="none" stroke="currentColor" strokeWidth="2" />
+        <svg width="12" height="12" viewBox="0 0 12 12" className="text-terminal-green">
+          <polygon
+            points="6,1 11,11 1,11"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
         </svg>
       </div>
       <div className="flex items-center gap-4 mb-4">
-        <div className="text-4xl sm:text-5xl font-black text-terminal-green">
-          L1
-        </div>
+        <div className="text-4xl sm:text-5xl font-black text-terminal-green">L1</div>
         <div className="flex-1">
           <div className="flex justify-between mb-1">
             <span className="text-xs uppercase tracking-wider">Experience</span>
-            <span className="text-xs uppercase tracking-wider">
-              {xp} / 1000 XP
-            </span>
+            <span className="text-xs uppercase tracking-wider">{xp} / 1000 XP</span>
           </div>
           <div className="h-2 bg-terminal-white/10 w-full">
             <div

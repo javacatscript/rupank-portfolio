@@ -1,6 +1,11 @@
 import type { Project, ProjectFormData } from "@/types/project";
 import type { Quest, QuestFormData } from "@/types/quest";
 import type { Skill, SkillFormData } from "@/types/skill";
+import type {
+  ResumeArchiveContent,
+  SiteContentBundle,
+  SiteContentKey,
+} from "@/types/siteContent";
 
 const credentials = "include" as RequestCredentials;
 
@@ -132,4 +137,40 @@ export async function deleteQuestApi(id: string): Promise<void> {
     const payload = (await response.json()) as { error?: string };
     throw new Error(payload.error ?? "Failed to delete quest");
   }
+}
+
+export async function fetchSiteContent(): Promise<SiteContentBundle> {
+  const response = await fetch("/api/site-content", { cache: "no-store" });
+  return parseResponse<SiteContentBundle>(response);
+}
+
+export async function patchSiteContent<K extends SiteContentKey>(
+  key: K,
+  value: SiteContentBundle[K]
+): Promise<SiteContentBundle[K]> {
+  const response = await fetch("/api/site-content", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials,
+    body: JSON.stringify({ key, value }),
+  });
+  const payload = (await response.json()) as {
+    data?: { key: K; value: SiteContentBundle[K] };
+    error?: string;
+  };
+  if (!response.ok) {
+    throw new Error(payload.error ?? `Request failed (${response.status})`);
+  }
+  return payload.data!.value;
+}
+
+export async function uploadResumeArchiveApi(
+  formData: FormData
+): Promise<ResumeArchiveContent> {
+  const response = await fetch("/api/resume/upload", {
+    method: "POST",
+    credentials,
+    body: formData,
+  });
+  return parseResponse<ResumeArchiveContent>(response);
 }

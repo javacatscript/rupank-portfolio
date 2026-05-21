@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import EditTrigger from "@/components/admin/EditTrigger";
+import ResumeArchiveEditModal from "@/components/admin/ResumeArchiveEditModal";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { uploadResumeArchiveApi } from "@/lib/portfolioApi";
 
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 10; // r=10
 
@@ -10,9 +14,12 @@ function fluctuate(base: number, min: number, max: number, step = 2): number {
 }
 
 export default function ContactSection() {
+  const { content, updateContent, reload } = useSiteContent();
+  const [resumeEditOpen, setResumeEditOpen] = useState(false);
   const [uptime, setUptime] = useState("128:44:02");
   const [memoryUtilization, setMemoryUtilization] = useState(42);
   const [syncPercent, setSyncPercent] = useState(88);
+  const resume = content.resume_archive;
 
   useEffect(() => {
     const [h, m, s] = uptime.split(":").map(Number);
@@ -104,8 +111,13 @@ export default function ContactSection() {
                 </h2>
               </div>
 
-              <div className="border-b-4 border-terminal-white/20 p-5 sm:p-6 bg-bg-primary/30 box-retro border-glow">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="group/edit relative border-b-4 border-terminal-white/20 p-5 sm:p-6 bg-bg-primary/30 box-retro border-glow">
+                <EditTrigger
+                  label="resume archive"
+                  onEdit={() => setResumeEditOpen(true)}
+                  className="absolute top-4 right-4"
+                />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 border border-terminal-white/20 flex items-center justify-center">
                       <svg
@@ -133,16 +145,22 @@ export default function ContactSection() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold tracking-wider">
-                        Resume_Rupank.v1
+                        {resume.title}
                       </h4>
                       <p className="text-[10px] text-terminal-muted tracking-wider">
-                        Size: 143KB // Format: PDF
+                        Size: {resume.sizeLabel} // Format: {resume.format}
                       </p>
                     </div>
                   </div>
                   <a
-                    href="/resume.pdf"
-                    download="Rupank_Joshi_Resume.pdf"
+                    href={resume.fileUrl}
+                    download={resume.downloadName}
+                    target={resume.fileUrl.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      resume.fileUrl.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
                     className="border border-terminal-white/20 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:border-terminal-green hover:text-terminal-green transition-all flex items-center gap-2 shrink-0"
                   >
                     <svg
@@ -195,6 +213,25 @@ export default function ContactSection() {
           </div>
         </div>
       </div>
+
+      <ResumeArchiveEditModal
+        key={`resume-edit-${resumeEditOpen}-${resume.title}-${resume.fileUrl}`}
+        isOpen={resumeEditOpen}
+        initial={resume}
+        onClose={() => setResumeEditOpen(false)}
+        onSaveMetadata={async (data) => {
+          await updateContent("resume_archive", data);
+        }}
+        onUpload={async (data, file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("title", data.title);
+          formData.append("downloadName", data.downloadName);
+          formData.append("format", data.format);
+          await uploadResumeArchiveApi(formData);
+          await reload();
+        }}
+      />
     </section>
   );
 }

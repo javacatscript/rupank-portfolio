@@ -9,6 +9,7 @@ import ProjectsSection from "@/components/projects/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import { PortfolioAdminProvider } from "@/context/PortfolioAdminContext";
+import { SiteContentProvider } from "@/context/SiteContentContext";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -36,15 +37,17 @@ export default function Home() {
 
   return (
     <PortfolioAdminProvider>
-      <Navbar activeSection={activeSection} />
-      <main>
-        <HeroSection />
-        <SkillsSection />
-        <ExperienceSection />
-        <ProjectsSection />
-        <ContactSection />
-      </main>
-      <Footer />
+      <SiteContentProvider>
+        <Navbar activeSection={activeSection} />
+        <main>
+          <HeroSection />
+          <SkillsSection />
+          <ExperienceSection />
+          <ProjectsSection />
+          <ContactSection />
+        </main>
+        <Footer />
+      </SiteContentProvider>
     </PortfolioAdminProvider>
   );
 }

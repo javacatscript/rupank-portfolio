@@ -5,6 +5,10 @@ import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import SkillFormModal from "@/components/skills/SkillFormModal";
 import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
+import EditTrigger from "@/components/admin/EditTrigger";
+import GearEditModal from "@/components/admin/GearEditModal";
+import SystemLogEditModal from "@/components/admin/SystemLogEditModal";
+import { useSiteContent } from "@/context/SiteContentContext";
 import { getSkillCategoryFilters } from "@/lib/skillCategories";
 import {
   createSkillApi,
@@ -14,27 +18,16 @@ import {
 } from "@/lib/portfolioApi";
 import type { Skill, SkillFilterCategory, SkillFormData } from "@/types/skill";
 
-const equippedGear = [
-  { name: "CURSOR_IDE", type: "PRIMARY_TOOL" },
-  { name: "REST/GRAPHQL_LINK", type: "DATA_TRANSFER" },
-  { name: "CI/CD_PIPELINE", type: "DEPLOY_SHIELD" },
-];
-
 const coreAttributes = [
   { name: "Web_Vitals_Optimization", value: 95 },
   { name: "AI_Integration", value: 88 },
 ];
 
-const systemLog = [
-  "> Loading _hellorupank.profile...",
-  "> [OK] React 18 & Next.js App Router",
-  "> [OK] Core Web Vitals optimized",
-  "> [OK] OpenAI API connection active",
-  "> _",
-];
-
 export default function SkillsSection() {
   const { isAdmin, requireAdmin } = usePortfolioAdmin();
+  const { content, updateContent } = useSiteContent();
+  const [gearEditOpen, setGearEditOpen] = useState(false);
+  const [logEditOpen, setLogEditOpen] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -277,13 +270,19 @@ export default function SkillsSection() {
           </div>
 
           <div className="lg:w-64 shrink-0 space-y-6">
-            <div className="bg-bg-card-alt border-l-2 border-terminal-white/20 p-4 box-retro">
-              <h3 className="text-terminal-green text-xs font-bold uppercase tracking-wider mb-4">
-                Equipped_Gear
-              </h3>
+            <div className="group/edit bg-bg-card-alt border-l-2 border-terminal-white/20 p-4 box-retro">
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <h3 className="text-terminal-green text-xs font-bold uppercase tracking-wider">
+                  Equipped_Gear
+                </h3>
+                <EditTrigger
+                  label="equipped gear"
+                  onEdit={() => setGearEditOpen(true)}
+                />
+              </div>
               <div className="space-y-3">
-                {equippedGear.map((gear, i) => (
-                  <div key={gear.name} className="flex items-start gap-3">
+                {content.equipped_gear.map((gear, i) => (
+                  <div key={gear.id} className="flex items-start gap-3">
                     <div
                       className={`w-8 h-8 shrink-0 flex items-center justify-center text-xs ${
                         i === 0
@@ -291,7 +290,7 @@ export default function SkillsSection() {
                           : "border border-terminal-white/20 text-terminal-muted"
                       }`}
                     >
-                      {i === 0 ? "⚙" : i === 1 ? "⇄" : "▶"}
+                      {gear.icon}
                     </div>
                     <div>
                       <div className="text-xs text-terminal-muted tracking-wider">
@@ -306,14 +305,20 @@ export default function SkillsSection() {
               </div>
             </div>
 
-            <div className="bg-bg-card p-4 box-retro">
-              <h3 className="text-terminal-muted text-xs uppercase tracking-wider mb-3">
-                System_Log:
-              </h3>
+            <div className="group/edit bg-bg-card p-4 box-retro">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h3 className="text-terminal-muted text-xs uppercase tracking-wider">
+                  System_Log:
+                </h3>
+                <EditTrigger
+                  label="system log"
+                  onEdit={() => setLogEditOpen(true)}
+                />
+              </div>
               <div className="space-y-1">
-                {systemLog.map((line, i) => (
+                {content.system_log.lines.map((line, i) => (
                   <p
-                    key={i}
+                    key={`${line}-${i}`}
                     className={`text-[11px] leading-relaxed ${
                       line === "> _"
                         ? "text-terminal-green animate-blink"
@@ -354,6 +359,26 @@ export default function SkillsSection() {
           void confirmDelete();
         }}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      <GearEditModal
+        key={`gear-edit-${gearEditOpen}-${content.equipped_gear.length}`}
+        isOpen={gearEditOpen}
+        initial={content.equipped_gear}
+        onClose={() => setGearEditOpen(false)}
+        onSave={async (items) => {
+          await updateContent("equipped_gear", items);
+        }}
+      />
+
+      <SystemLogEditModal
+        key={`log-edit-${logEditOpen}-${content.system_log.lines.length}`}
+        isOpen={logEditOpen}
+        initialLines={content.system_log.lines}
+        onClose={() => setLogEditOpen(false)}
+        onSave={async (lines) => {
+          await updateContent("system_log", { lines });
+        }}
       />
     </section>
   );
