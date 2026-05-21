@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ColorPalettePicker from "@/components/ColorPalettePicker";
 
 interface NavbarProps {
   activeSection: string;
@@ -55,6 +56,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            <ColorPalettePicker />
             <a
               href="#contact"
               className="bg-terminal-green text-black text-xs font-bold px-4 py-1.5 tracking-wider hover:bg-terminal-green/90 transition-colors"
@@ -63,11 +65,13 @@ export default function Navbar({ activeSection }: NavbarProps) {
             </a>
           </div>
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-terminal-green"
-            aria-label="Toggle menu"
-          >
+          <div className="flex md:hidden items-center gap-2">
+            <ColorPalettePicker />
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="text-terminal-green"
+              aria-label="Toggle menu"
+            >
             <svg
               width="24"
               height="24"
@@ -82,7 +86,8 @@ export default function Navbar({ activeSection }: NavbarProps) {
                 <path d="M3 12h18M3 6h18M3 18h18" />
               )}
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 

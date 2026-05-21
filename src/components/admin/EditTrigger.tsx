@@ -25,7 +25,7 @@ export default function EditTrigger({
       }}
       aria-label={`Edit ${label}`}
       title="Edit content"
-      className={`inline-flex items-center justify-center w-7 h-7 border border-terminal-green/50 bg-bg-card/90 text-terminal-green opacity-0 group-hover/edit:opacity-100 focus:opacity-100 transition-all duration-200 hover:bg-terminal-green hover:text-black hover:border-terminal-green hover:shadow-[0_0_8px_rgba(0,255,0,0.45)] shrink-0 ${className}`}
+      className={`inline-flex items-center justify-center w-7 h-7 border border-terminal-green/50 bg-bg-card/90 text-terminal-green opacity-0 group-hover/edit:opacity-100 focus:opacity-100 transition-all duration-200 hover:bg-terminal-green hover:text-black hover:border-terminal-green hover:shadow-accent-sm shrink-0 ${className}`}
     >
       <svg
         width="12"

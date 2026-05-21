@@ -213,7 +213,7 @@ function QuestCard({
       <div
         className={`absolute left-2.5 md:left-6.5 top-2 w-3 h-3 rounded-full border-2 ${
           quest.status === "active"
-            ? "bg-terminal-green border-terminal-green shadow-[0_0_8px_rgba(0,255,0,0.6)]"
+            ? "bg-terminal-green border-terminal-green shadow-accent-glow"
             : "bg-terminal-white/20 border-terminal-white/40"
         }`}
       />

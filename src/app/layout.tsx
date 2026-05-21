@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,8 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full bg-bg-primary text-terminal-white font-mono">
+        <Script id="portfolio-theme-init" strategy="beforeInteractive">
+          {`(function(){try{var s=localStorage.getItem("portfolio-accent-color");if(!s)return;var h=s.trim().toLowerCase(),m=/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(h);if(!m)return;var r=m[1];if(r.length===3)r=r[0]+r[0]+r[1]+r[1]+r[2]+r[2];var R=parseInt(r.slice(0,2),16),G=parseInt(r.slice(2,4),16),B=parseInt(r.slice(4,6),16),d=document.documentElement;d.style.setProperty("--accent","#"+r);d.style.setProperty("--accent-rgb",R+" "+G+" "+B);}catch(e){}})();`}
+        </Script>
         {children}
       </body>
     </html>

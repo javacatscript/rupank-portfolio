@@ -1,12 +1,18 @@
 @import "tailwindcss";
+@import "./accent-theme.css";
+
+:root {
+  --accent: #00ff00;
+  --accent-rgb: 0 255 0;
+}
 
 @theme inline {
   --color-bg-primary: #131313;
   --color-bg-panel: rgba(255, 255, 255, 0);
   --color-bg-card: #1a1a1a;
   --color-bg-card-alt: #0f0f0f;
-  --color-terminal-green: #00ff00;
-  --color-terminal-green-dim: rgba(0, 255, 0, 0.6);
+  --color-terminal-green: var(--accent);
+  --color-terminal-green-dim: rgb(var(--accent-rgb) / 0.6);
   --color-terminal-white: #e5e7eb;
   --color-terminal-muted: #6b7280;
   --color-accent-gold: #fbbf24;
@@ -44,7 +50,7 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #00ff00 #131313;
+  scrollbar-color: var(--accent) #131313;
 }
 
 html {
@@ -58,7 +64,7 @@ body {
 }
 
 ::selection {
-  background: #00ff00;
+  background: var(--accent);
   color: #000000;
 }
 
@@ -165,11 +171,11 @@ body {
 }
 
 .text-glow {
-  text-shadow: 0px 0px 10px rgba(0, 255, 0, 1);
+  text-shadow: 0px 0px 10px rgb(var(--accent-rgb) / 1);
 }
 
 .text-glow-sm {
-  text-shadow: 0px 0px 6px rgba(0, 255, 0, 0.6);
+  text-shadow: 0px 0px 6px rgb(var(--accent-rgb) / 0.6);
 }
 
 .box-retro {
@@ -196,6 +202,18 @@ body {
 
 .border-glow {
   box-shadow:
-    0 0 5px rgba(0, 255, 0, 0.3),
-    inset 0 0 5px rgba(0, 255, 0, 0.1);
+    0 0 5px rgb(var(--accent-rgb) / 0.3),
+    inset 0 0 5px rgb(var(--accent-rgb) / 0.1);
+}
+
+.shadow-accent-sm {
+  box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.45);
+}
+
+.shadow-accent-md {
+  box-shadow: 4px 4px 0px 0px rgb(var(--accent-rgb) / 0.3);
+}
+
+.shadow-accent-glow {
+  box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.6);
 }

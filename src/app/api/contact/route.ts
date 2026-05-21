@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
+}
 
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -46,7 +50,9 @@ export async function POST(request: Request) {
     const contactEmail = process.env.CONTACT_EMAIL;
     const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResendClient();
+
+    if (!resend) {
       console.error("[contact] RESEND_API_KEY is not set");
       return NextResponse.json(
         { error: "Email service is not configured" },

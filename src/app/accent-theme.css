@@ -1,0 +1,129 @@
+/* Overrides Tailwind compile bug: <alpha-value> left literal in output. */
+
+@layer utilities {
+  .text-terminal-green {
+    color: var(--accent);
+  }
+
+  .text-terminal-green\/25 {
+    color: rgb(var(--accent-rgb) / 0.25);
+  }
+
+  .text-terminal-green\/50 {
+    color: rgb(var(--accent-rgb) / 0.5);
+  }
+
+  .text-terminal-green\/70 {
+    color: rgb(var(--accent-rgb) / 0.7);
+  }
+
+  .bg-terminal-green {
+    background-color: var(--accent);
+  }
+
+  .bg-terminal-green\/5 {
+    background-color: rgb(var(--accent-rgb) / 0.05);
+  }
+
+  .bg-terminal-green\/10 {
+    background-color: rgb(var(--accent-rgb) / 0.1);
+  }
+
+  .bg-terminal-green\/20 {
+    background-color: rgb(var(--accent-rgb) / 0.2);
+  }
+
+  .bg-terminal-green\/30 {
+    background-color: rgb(var(--accent-rgb) / 0.3);
+  }
+
+  .bg-terminal-green\/40 {
+    background-color: rgb(var(--accent-rgb) / 0.4);
+  }
+
+  .border-terminal-green {
+    border-color: var(--accent);
+  }
+
+  .border-terminal-green\/30 {
+    border-color: rgb(var(--accent-rgb) / 0.3);
+  }
+
+  .border-terminal-green\/40 {
+    border-color: rgb(var(--accent-rgb) / 0.4);
+  }
+
+  .border-terminal-green\/50 {
+    border-color: rgb(var(--accent-rgb) / 0.5);
+  }
+
+  .border-terminal-green\/60 {
+    border-color: rgb(var(--accent-rgb) / 0.6);
+  }
+
+  .accent-terminal-green {
+    accent-color: var(--accent);
+  }
+
+  @media (hover: hover) {
+    .hover\:border-terminal-green:hover {
+      border-color: var(--accent);
+    }
+
+    .hover\:border-terminal-green\/30:hover {
+      border-color: rgb(var(--accent-rgb) / 0.3);
+    }
+
+    .hover\:border-terminal-green\/40:hover {
+      border-color: rgb(var(--accent-rgb) / 0.4);
+    }
+
+    .hover\:border-terminal-green\/60:hover {
+      border-color: rgb(var(--accent-rgb) / 0.6);
+    }
+
+    .hover\:bg-terminal-green:hover {
+      background-color: var(--accent);
+    }
+
+    .hover\:bg-terminal-green\/5:hover {
+      background-color: rgb(var(--accent-rgb) / 0.05);
+    }
+
+    .hover\:bg-terminal-green\/10:hover {
+      background-color: rgb(var(--accent-rgb) / 0.1);
+    }
+
+    .hover\:bg-terminal-green\/90:hover {
+      background-color: rgb(var(--accent-rgb) / 0.9);
+    }
+
+    .hover\:text-terminal-green:hover {
+      color: var(--accent);
+    }
+
+    .group-hover\:border-terminal-green\/30:is(:where(.group):hover *) {
+      border-color: rgb(var(--accent-rgb) / 0.3);
+    }
+
+    .group-hover\:text-terminal-green:is(:where(.group):hover *) {
+      color: var(--accent);
+    }
+
+    .group-hover\/skill\:text-terminal-green:is(:where(.group\/skill):hover *) {
+      color: var(--accent);
+    }
+
+    .hover\:file\:border-terminal-green\/60:hover::file-selector-button {
+      border-color: rgb(var(--accent-rgb) / 0.6);
+    }
+  }
+
+  .focus\:border-terminal-green\/60:focus {
+    border-color: rgb(var(--accent-rgb) / 0.6);
+  }
+
+  .file\:text-terminal-green::file-selector-button {
+    color: var(--accent);
+  }
+}

@@ -10,6 +10,7 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import { PortfolioAdminProvider } from "@/context/PortfolioAdminContext";
 import { SiteContentProvider } from "@/context/SiteContentContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -36,18 +37,20 @@ export default function Home() {
   }, []);
 
   return (
-    <PortfolioAdminProvider>
-      <SiteContentProvider>
-        <Navbar activeSection={activeSection} />
-        <main>
-          <HeroSection />
-          <SkillsSection />
-          <ExperienceSection />
-          <ProjectsSection />
-          <ContactSection />
-        </main>
-        <Footer />
-      </SiteContentProvider>
-    </PortfolioAdminProvider>
+    <ThemeProvider>
+      <PortfolioAdminProvider>
+        <SiteContentProvider>
+          <Navbar activeSection={activeSection} />
+          <main>
+            <HeroSection />
+            <SkillsSection />
+            <ExperienceSection />
+            <ProjectsSection />
+            <ContactSection />
+          </main>
+          <Footer />
+        </SiteContentProvider>
+      </PortfolioAdminProvider>
+    </ThemeProvider>
   );
 }

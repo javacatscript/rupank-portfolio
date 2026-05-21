@@ -28,7 +28,7 @@ export default function ProjectCard({
   onEdit,
   onDelete,
 }: ProjectCardProps) {
-  const ref = useRef<HTMLArticleElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

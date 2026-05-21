@@ -82,7 +82,7 @@ export default function HeroSection() {
         >
           <a
             href="#experience"
-            className="group border-4 border-transparent hover:border-terminal-green px-8 sm:px-12 py-4 sm:py-5 box-retro transition-all duration-200 hover:shadow-[4px_4px_0px_0px_rgba(0,255,0,0.3)]"
+            className="group border-4 border-transparent hover:border-terminal-green px-8 sm:px-12 py-4 sm:py-5 box-retro transition-all duration-200 hover:shadow-accent-md"
           >
             <span className="text-base sm:text-xl font-black tracking-[0.1em] uppercase group-hover:text-terminal-green transition-colors">
               START GAME

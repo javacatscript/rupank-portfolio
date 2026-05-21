@@ -18,7 +18,7 @@ import {
 
 interface PortfolioAdminContextValue {
   isAdmin: boolean;
-  requireAdmin: (action: () => void) => void;
+  requireAdmin: (action: () => void, title?: string) => void;
   openAuthLogin: () => void;
   lockSession: () => Promise<void>;
   refreshAdminState: () => Promise<void>;
