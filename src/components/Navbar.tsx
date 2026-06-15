@@ -143,7 +143,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
                 </a>
               );
             })}
-            <button
+            {/* <button
               type="button"
               onClick={() => {
                 setMobileOpen(false);
@@ -152,7 +152,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
               className={`block w-full ${saveButtonClass} px-4 py-2 text-center mt-3`}
             >
               SAVE GAME
-            </button>
+            </button> */}
           </div>
         </div>
       )}

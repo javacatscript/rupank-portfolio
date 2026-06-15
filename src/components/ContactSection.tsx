@@ -239,7 +239,7 @@ export default function ContactSection() {
       <div className="hidden lg:block fixed bottom-8 right-8 z-40">
         <div className="border-l-2 border-terminal-white/20 bg-bg-primary/80 backdrop-blur-sm p-3 box-retro border-glow">
           <p className="text-[10px] text-terminal-muted tracking-widest uppercase mb-1">
-            System Health
+            Scroll Progress
           </p>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 relative">
@@ -258,7 +258,7 @@ export default function ContactSection() {
               </svg>
             </div>
             <span className="text-xs font-bold text-terminal-green tabular-nums">
-              {syncPercent}% SYNC
+              {syncPercent}% Done
             </span>
           </div>
         </div>
