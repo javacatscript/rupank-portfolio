@@ -9,14 +9,42 @@ import {
   createQuestApi,
   deleteQuestApi,
   fetchQuests,
+  fetchSkills,
   updateQuestApi,
 } from "@/lib/portfolioApi";
 import type { Quest, QuestFormData } from "@/types/quest";
+import type { Skill } from "@/types/skill";
 
-const skillTree = [
-  { name: "React Framework", level: "LVL 99", width: 99 },
-  { name: "Tailwind CSS", level: "LVL 92", width: 92 },
-];
+interface SkillTreeEntry {
+  name: string;
+  level: string;
+  width: number;
+}
+
+// Parse the numeric level out of a skill's "LVL. 99" label.
+function parseSkillLevel(level: string): number {
+  const match = level.match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+// Build the Skill Tree teaser from the highest *numeric*-level skills so every
+// bar is meaningful. Skills with non-numeric levels ("NEW", "EPIC") are skipped
+// here — they'd render as empty bars. Ties break toward highlighted skills.
+function deriveSkillTree(skills: Skill[]): SkillTreeEntry[] {
+  return [...skills]
+    .filter((s) => parseSkillLevel(s.level) > 0)
+    .sort((a, b) => {
+      const diff = parseSkillLevel(b.level) - parseSkillLevel(a.level);
+      if (diff !== 0) return diff;
+      return Number(b.highlight ?? false) - Number(a.highlight ?? false);
+    })
+    .slice(0, 5)
+    .map((s) => ({
+      name: s.name,
+      level: s.level,
+      width: parseSkillLevel(s.level),
+    }));
+}
 
 export default function ExperienceSection() {
   const { isAdmin, requireAdmin } = usePortfolioAdmin();
@@ -27,6 +55,7 @@ export default function ExperienceSection() {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [editingQuest, setEditingQuest] = useState<Quest | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Quest | null>(null);
+  const [skillTree, setSkillTree] = useState<SkillTreeEntry[]>([]);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -39,6 +68,20 @@ export default function ExperienceSection() {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetchSkills()
+      .then((skills) => {
+        if (active) setSkillTree(deriveSkillTree(skills));
+      })
+      .catch(() => {
+        /* Skill Tree teaser stays empty if the inventory can't be reached. */
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -147,7 +190,7 @@ export default function ExperienceSection() {
         )}
 
         <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SkillTreeTeaser />
+          <SkillTreeTeaser skills={skillTree} />
           <AchievementsTeaser />
           <UnlockNextTeaser />
         </div>
@@ -293,7 +336,7 @@ function QuestCard({
   );
 }
 
-function SkillTreeTeaser() {
+function SkillTreeTeaser({ skills }: { skills: SkillTreeEntry[] }) {
   return (
     <div className="bg-bg-card-alt border border-terminal-white/10 p-5">
       <div className="flex items-center gap-2 mb-4">
@@ -315,7 +358,10 @@ function SkillTreeTeaser() {
         </h3>
       </div>
       <div className="space-y-3">
-        {skillTree.map((skill) => (
+        {skills.length === 0 && (
+          <p className="text-terminal-muted/50 text-xs">Loading skill tree…</p>
+        )}
+        {skills.map((skill) => (
           <div key={skill.name}>
             <div className="flex justify-between text-xs mb-1">
               <span className="text-terminal-muted">{skill.name}</span>
@@ -359,11 +405,15 @@ function AchievementsTeaser() {
         </h3>
       </div>
       <div className="grid grid-cols-3 gap-2">
-        {["40%", "4.9★", "300+"].map((stat, i) => (
-          <div key={i} className="text-center">
-            <div className="text-lg font-bold text-terminal-green">{stat}</div>
+        {[
+          { value: "+40%", label: "Web Vitals", title: "Core Web Vitals improvement (LCP & INP) after a Next.js 11→13 / React 17→18 migration" },
+          { value: "+25%", label: "Conversion", title: "Demo-to-paid conversion lift from onboarding funnels & analytics dashboards" },
+          { value: "4.9★", label: "Mentor Rating", title: "Satisfaction rating across 300+ React/JS queries resolved as a Teaching Assistant" },
+        ].map((stat) => (
+          <div key={stat.label} className="text-center" title={stat.title}>
+            <div className="text-lg font-bold text-terminal-green">{stat.value}</div>
             <div className="text-[9px] text-terminal-muted uppercase tracking-wider">
-              {i === 0 ? "WEB VITALS" : i === 1 ? "RATING" : "QUERIES"}
+              {stat.label}
             </div>
           </div>
         ))}

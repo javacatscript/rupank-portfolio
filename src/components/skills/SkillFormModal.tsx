@@ -17,8 +17,8 @@ const inputClass =
 const categoryOptions: { id: SkillCategory; label: string }[] = [
   { id: "languages", label: "LANGUAGES" },
   { id: "frontend", label: "FRONTEND" },
-  { id: "backend", label: "BACKEND_APIS" },
-  { id: "perf_ai", label: "PERF_AI" },
+  { id: "backend", label: "BACKEND" },
+  { id: "perf_ai", label: "PERFORMANCE" },
   { id: "tools", label: "TOOLS" },
 ];
 

@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import PlayerProfileSection from "@/components/PlayerProfileSection";
 import SkillsSection from "@/components/SkillsSection";
 import ExperienceSection from "@/components/ExperienceSection";
 import ProjectsSection from "@/components/projects/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
+import { ArcadeProvider } from "@/context/ArcadeContext";
 import { PortfolioAdminProvider } from "@/context/PortfolioAdminContext";
 import { SiteContentProvider } from "@/context/SiteContentContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -40,15 +42,18 @@ export default function Home() {
     <ThemeProvider>
       <PortfolioAdminProvider>
         <SiteContentProvider>
-          <Navbar activeSection={activeSection} />
-          <main>
-            <HeroSection />
-            <SkillsSection />
-            <ExperienceSection />
-            <ProjectsSection />
-            <ContactSection />
-          </main>
-          <Footer />
+          <ArcadeProvider>
+            <Navbar activeSection={activeSection} />
+            <main>
+              <HeroSection />
+              <PlayerProfileSection />
+              <SkillsSection />
+              <ExperienceSection />
+              <ProjectsSection />
+              <ContactSection />
+            </main>
+            <Footer />
+          </ArcadeProvider>
         </SiteContentProvider>
       </PortfolioAdminProvider>
     </ThemeProvider>

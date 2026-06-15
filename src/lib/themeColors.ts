@@ -9,7 +9,6 @@ export interface AccentPreset {
 
 export const ACCENT_PRESETS: AccentPreset[] = [
   { id: "terminal", name: "Terminal Green", hex: "#00ff00" },
-  { id: "lavender", name: "Lavender", hex: "#c4b5fd" },
   { id: "golden", name: "Golden", hex: "#fbbf24" },
   { id: "orange", name: "Dark Orange", hex: "#ea580c" },
   { id: "pink", name: "Bright Pink", hex: "#ff2d95" },

@@ -10,8 +10,8 @@ export function getSkillCategoryFilters(skills: Skill[]) {
     { id: "all" as const, label: "ALL_ITEMS", count: `[${String(countByCategory("all")).padStart(2, "0")}]` },
     { id: "languages" as const, label: "LANGUAGES", count: `[${String(countByCategory("languages")).padStart(2, "0")}]` },
     { id: "frontend" as const, label: "FRONTEND", count: `[${String(countByCategory("frontend")).padStart(2, "0")}]` },
-    { id: "backend" as const, label: "BACKEND_APIS", count: `[${String(countByCategory("backend")).padStart(2, "0")}]` },
-    { id: "perf_ai" as const, label: "PERF_AI", count: `[${String(countByCategory("perf_ai")).padStart(2, "0")}]` },
+    { id: "backend" as const, label: "BACKEND", count: `[${String(countByCategory("backend")).padStart(2, "0")}]` },
+    { id: "perf_ai" as const, label: "PERFORMANCE", count: `[${String(countByCategory("perf_ai")).padStart(2, "0")}]` },
     { id: "tools" as const, label: "TOOLS", count: `[${String(countByCategory("tools")).padStart(2, "0")}]` },
   ];
 }

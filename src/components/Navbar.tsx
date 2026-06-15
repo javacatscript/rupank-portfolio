@@ -2,28 +2,44 @@
 
 import { useState } from "react";
 import ColorPalettePicker from "@/components/ColorPalettePicker";
+import { useArcade } from "@/context/ArcadeContext";
 
 interface NavbarProps {
   activeSection: string;
 }
 
 const navLinks = [
-  { id: "start", label: "START", href: "#hero" },
-  { id: "inventory", label: "INVENTORY", href: "#skills" },
-  { id: "questlog", label: "QUEST LOG", href: "#experience" },
-  { id: "projects", label: "PROJECTS", href: "#projects" },
+  { id: "start", label: "START", sub: "home", href: "#hero" },
+  { id: "inventory", label: "INVENTORY", sub: "skills", href: "#skills" },
+  { id: "questlog", label: "QUEST LOG", sub: "experience", href: "#experience" },
+  { id: "projects", label: "PROJECTS", sub: "work", href: "#projects" },
+  { id: "savepoint", label: "SAVE POINT", sub: "contact", href: "#contact" },
 ];
 
 export default function Navbar({ activeSection }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isOpen, open, requestSave } = useArcade();
 
   const getActiveId = () => {
     if (activeSection === "hero") return "start";
     if (activeSection === "skills") return "inventory";
     if (activeSection === "experience") return "questlog";
     if (activeSection === "projects") return "projects";
+    if (activeSection === "contact") return "savepoint";
     return "start";
   };
+
+  const handleSaveGame = async () => {
+    if (isOpen) {
+      await requestSave();
+      return;
+    }
+    open("navSave");
+    document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const saveButtonClass =
+    "bg-terminal-green text-black text-xs font-bold tracking-wider hover:bg-terminal-green/90 transition-colors";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-bg-primary/95 backdrop-blur-sm border-b border-terminal-white/20 box-retro">
@@ -33,23 +49,30 @@ export default function Navbar({ activeSection }: NavbarProps) {
             _hellorupank
           </a>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-end gap-6">
             {navLinks.map((link) => {
               const isActive = getActiveId() === link.id;
               return (
                 <a
                   key={link.id}
                   href={link.href}
-                  className={`text-xs tracking-widest transition-colors duration-200 flex items-center gap-1.5 ${
+                  className={`group flex flex-col items-center leading-none transition-colors duration-200 ${
                     isActive
                       ? "text-terminal-green"
                       : "text-terminal-muted hover:text-terminal-white"
                   }`}
                 >
-                  {isActive && (
-                    <span className="text-terminal-green">&gt;</span>
+                  <span className="flex items-center gap-1.5 text-xs tracking-widest">
+                    {isActive && (
+                      <span className="text-terminal-green">&gt;</span>
+                    )}
+                    {link.label}
+                  </span>
+                  {link.sub && (
+                    <span className="mt-1 text-[9px] tracking-[0.2em] lowercase text-terminal-muted/40 group-hover:text-terminal-muted/70 transition-colors">
+                      {link.sub}
+                    </span>
                   )}
-                  {link.label}
                 </a>
               );
             })}
@@ -57,12 +80,13 @@ export default function Navbar({ activeSection }: NavbarProps) {
 
           <div className="hidden md:flex items-center gap-3">
             <ColorPalettePicker />
-            <a
-              href="#contact"
-              className="bg-terminal-green text-black text-xs font-bold px-4 py-1.5 tracking-wider hover:bg-terminal-green/90 transition-colors"
+            {/* <button
+              type="button"
+              onClick={() => void handleSaveGame()}
+              className={`${saveButtonClass} px-4 py-1.5`}
             >
               SAVE GAME
-            </a>
+            </button> */}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
@@ -101,24 +125,34 @@ export default function Navbar({ activeSection }: NavbarProps) {
                   key={link.id}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`block text-xs tracking-widest py-1 ${
+                  className={`flex items-baseline gap-2 text-xs tracking-widest py-1 ${
                     isActive
                       ? "text-terminal-green"
                       : "text-terminal-muted"
                   }`}
                 >
-                  {isActive && "> "}
-                  {link.label}
+                  <span>
+                    {isActive && "> "}
+                    {link.label}
+                  </span>
+                  {link.sub && (
+                    <span className="text-[10px] tracking-[0.2em] lowercase text-terminal-muted/40">
+                      {link.sub}
+                    </span>
+                  )}
                 </a>
               );
             })}
-            <a
-              href="#contact"
-              onClick={() => setMobileOpen(false)}
-              className="block bg-terminal-green text-black text-xs font-bold px-4 py-2 tracking-wider text-center mt-3"
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                void handleSaveGame();
+              }}
+              className={`block w-full ${saveButtonClass} px-4 py-2 text-center mt-3`}
             >
               SAVE GAME
-            </a>
+            </button>
           </div>
         </div>
       )}

@@ -18,9 +18,13 @@ import {
 } from "@/lib/portfolioApi";
 import type { Skill, SkillFilterCategory, SkillFormData } from "@/types/skill";
 
+// Meta-competencies that span the skill list — curated from real specialties
+// (Core Web Vitals work, App Router SSR/SSG, OpenAI/Gemini integrations).
 const coreAttributes = [
   { name: "Web_Vitals_Optimization", value: 95 },
-  { name: "AI_Integration", value: 88 },
+  { name: "SSR_SSG_Architecture", value: 92 },
+  { name: "AI_LLM_Integration", value: 90 },
+  { name: "Component_Architecture", value: 90 },
 ];
 
 export default function SkillsSection() {
@@ -37,6 +41,7 @@ export default function SkillsSection() {
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [editingSkill, setEditingSkill] = useState<Skill | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
+  const [syncState, setSyncState] = useState<"idle" | "syncing" | "done">("idle");
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -54,6 +59,14 @@ export default function SkillsSection() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  const handleSync = useCallback(async () => {
+    if (syncState === "syncing") return;
+    setSyncState("syncing");
+    await loadData();
+    setSyncState("done");
+    setTimeout(() => setSyncState("idle"), 1800);
+  }, [loadData, syncState]);
 
   const categories = useMemo(() => getSkillCategoryFilters(skills), [skills]);
 
@@ -333,9 +346,15 @@ export default function SkillsSection() {
 
             <button
               type="button"
-              className="w-full bg-bg-card border border-terminal-white/10 py-2.5 text-terminal-green text-xs font-bold uppercase tracking-widest hover:bg-terminal-green/10 hover:border-terminal-green/30 transition-all duration-200"
+              onClick={handleSync}
+              disabled={syncState === "syncing"}
+              className="w-full bg-bg-card border border-terminal-white/10 py-2.5 text-terminal-green text-xs font-bold uppercase tracking-widest hover:bg-terminal-green/10 hover:border-terminal-green/30 transition-all duration-200 disabled:opacity-60 disabled:cursor-wait"
             >
-              SYNC_PORTFOLIO
+              {syncState === "syncing"
+                ? "SYNCING..."
+                : syncState === "done"
+                  ? "✓ SYNCED"
+                  : "SYNC_PORTFOLIO"}
             </button>
           </div>
         </div>

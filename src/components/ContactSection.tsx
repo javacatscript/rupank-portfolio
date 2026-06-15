@@ -5,6 +5,7 @@ import EditTrigger from "@/components/admin/EditTrigger";
 import ResumeArchiveEditModal from "@/components/admin/ResumeArchiveEditModal";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { uploadResumeArchiveApi } from "@/lib/portfolioApi";
+import { SOCIAL_LINKS } from "@/data/socialLinks";
 
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 10; // r=10
 
@@ -18,7 +19,7 @@ export default function ContactSection() {
   const [resumeEditOpen, setResumeEditOpen] = useState(false);
   const [uptime, setUptime] = useState("128:44:02");
   const [memoryUtilization, setMemoryUtilization] = useState(42);
-  const [syncPercent, setSyncPercent] = useState(88);
+  const [syncPercent, setSyncPercent] = useState(0);
   const resume = content.resume_archive;
 
   useEffect(() => {
@@ -37,12 +38,30 @@ export default function ContactSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Memory Bank Utilization stays as ambient flavor (a genuinely fluctuating metric).
   useEffect(() => {
     const interval = setInterval(() => {
       setMemoryUtilization((prev) => fluctuate(prev, 20, 60, 2.5));
-      setSyncPercent((prev) => fluctuate(prev, 80, 96, 2));
     }, 2200);
     return () => clearInterval(interval);
+  }, []);
+
+  // SYNC reflects how far the visitor has explored the page — fills toward 100%
+  // at the Save Point, instead of drifting randomly.
+  useEffect(() => {
+    const computeSync = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      const pct = max > 0 ? Math.min(100, Math.round((doc.scrollTop / max) * 100)) : 100;
+      setSyncPercent(pct);
+    };
+    computeSync();
+    window.addEventListener("scroll", computeSync, { passive: true });
+    window.addEventListener("resize", computeSync);
+    return () => {
+      window.removeEventListener("scroll", computeSync);
+      window.removeEventListener("resize", computeSync);
+    };
   }, []);
 
   return (
@@ -80,6 +99,37 @@ export default function ContactSection() {
                     Memory Bank Utilization: {memoryUtilization}%
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-terminal-white/20 p-4 bg-bg-primary/50 box-retro border-glow">
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-3">
+                Comm Channels
+              </h4>
+              <div className="space-y-2">
+                {SOCIAL_LINKS.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      link.href.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                    className="group flex items-center justify-between gap-3 text-xs tracking-wider text-terminal-muted hover:text-terminal-green transition-colors"
+                  >
+                    <span className="text-terminal-green/70 group-hover:text-terminal-green">
+                      {link.label}
+                    </span>
+                    <span className="truncate text-right tabular-nums">
+                      {link.handle}
+                      <span className="ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        ↗
+                      </span>
+                    </span>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
