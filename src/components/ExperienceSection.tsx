@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AdminSectionToolbar from "@/components/admin/AdminSectionToolbar";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
+import LootChestModal from "@/components/LootChestModal";
 import QuestFormModal from "@/components/quests/QuestFormModal";
 import { usePortfolioAdmin } from "@/context/PortfolioAdminContext";
 import {
@@ -56,6 +57,7 @@ export default function ExperienceSection() {
   const [editingQuest, setEditingQuest] = useState<Quest | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Quest | null>(null);
   const [skillTree, setSkillTree] = useState<SkillTreeEntry[]>([]);
+  const [activeLootQuest, setActiveLootQuest] = useState<Quest | null>(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -175,6 +177,7 @@ export default function ExperienceSection() {
                 isAdmin={isAdmin}
                 onEdit={handleEdit}
                 onDelete={handleDeleteRequest}
+                onViewLoot={setActiveLootQuest}
               />
             ))}
           </div>
@@ -214,6 +217,11 @@ export default function ExperienceSection() {
         }}
         onClose={() => setDeleteTarget(null)}
       />
+
+      <LootChestModal
+        quest={activeLootQuest}
+        onClose={() => setActiveLootQuest(null)}
+      />
     </section>
   );
 }
@@ -224,12 +232,14 @@ function QuestCard({
   isAdmin,
   onEdit,
   onDelete,
+  onViewLoot,
 }: {
   quest: Quest;
   index: number;
   isAdmin: boolean;
   onEdit: (quest: Quest) => void;
   onDelete: (quest: Quest) => void;
+  onViewLoot: (quest: Quest) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -299,8 +309,9 @@ function QuestCard({
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <a
-                href="#projects"
+              <button
+                type="button"
+                onClick={() => onViewLoot(quest)}
                 className={`text-xs font-bold uppercase tracking-widest px-4 py-2 transition-colors ${
                   quest.status === "active"
                     ? "bg-terminal-green text-black hover:bg-terminal-green/90"
@@ -308,7 +319,7 @@ function QuestCard({
                 }`}
               >
                 VIEW LOOT
-              </a>
+              </button>
 
               {isAdmin && (
                 <>
