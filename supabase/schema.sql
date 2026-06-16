@@ -91,8 +91,8 @@ insert into skills (id, name, level, category, icon, highlight, sort_order) valu
   ('skill-git', 'Git', 'LVL. 95', array['tools'], 'GT', false, 15),
   ('skill-cicd', 'CI/CD', 'LVL. 80', array['tools'], '▶', false, 16),
   ('skill-figma', 'Figma', 'LVL. 85', array['tools'], 'FG', false, 17),
-  ('skill-claude', 'Claude Code', 'LVL. 95', array['tools'], 'CL', false, 18),
-  ('skill-cursor', 'Cursor IDE', 'LVL. 99', array['tools'], 'CI', true, 19);
+  ('skill-claude', 'Claude Code', 'LVL. 97', array['tools'], 'CC', false, 18),
+  ('skill-cursor', 'Cursor IDE', 'LVL. 95', array['tools'], 'CI', true, 19);
 
 insert into quests (id, status, title, company, period, description, sort_order) values
   ('quest-kraya', 'active', 'Software Engineer Frontend', 'Kraya AI', 'Apr 2023 - PRESENT', 'Leading development of a modular frontend architecture using React, Next.js (App Router), and TypeScript. Achieved a 40% improvement in Core Web Vitals (notably LCP and INP) through optimized SSR/SSG strategies.', 0),

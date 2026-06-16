@@ -382,42 +382,66 @@ function SkillTreeTeaser({ skills }: { skills: SkillTreeEntry[] }) {
 
 function AchievementsTeaser() {
   return (
-    <div className="bg-bg-card-alt border border-terminal-white/10 p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          className="text-terminal-muted"
-        >
-          <circle
-            cx="8"
-            cy="8"
-            r="6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
+    <div className="bg-bg-card-alt border border-terminal-white/10 p-5 flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" className="text-terminal-muted">
+          <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
           <path d="M8 4V8L11 10" stroke="currentColor" strokeWidth="1.5" />
         </svg>
         <h3 className="text-terminal-muted text-sm font-bold uppercase tracking-wider">
           Achievements
         </h3>
       </div>
+
+      {/* Hero stats */}
       <div className="grid grid-cols-3 gap-2">
         {[
-          { value: "+40%", label: "Web Vitals", title: "Core Web Vitals improvement (LCP & INP) after a Next.js 11→13 / React 17→18 migration" },
-          { value: "+25%", label: "Conversion", title: "Demo-to-paid conversion lift from onboarding funnels & analytics dashboards" },
-          { value: "4.9★", label: "Mentor Rating", title: "Satisfaction rating across 300+ React/JS queries resolved as a Teaching Assistant" },
+          { value: "+40%", label: "Web Vitals",   title: "Core Web Vitals improvement (LCP & INP) after Next.js 11→13 / React 17→18 migration" },
+          { value: "+25%", label: "Conversion",   title: "Demo-to-paid conversion lift via onboarding funnels & analytics dashboards" },
+          { value: "4.9★", label: "Mentor Rating",title: "Satisfaction rating across 300+ React/JS queries as Teaching Assistant" },
         ].map((stat) => (
           <div key={stat.label} className="text-center" title={stat.title}>
             <div className="text-lg font-bold text-terminal-green">{stat.value}</div>
-            <div className="text-[9px] text-terminal-muted uppercase tracking-wider">
-              {stat.label}
-            </div>
+            <div className="text-[9px] text-terminal-muted uppercase tracking-wider">{stat.label}</div>
           </div>
         ))}
       </div>
+
+      <div className="border-t border-terminal-white/10" />
+
+      {/* Battle records */}
+      <div>
+        <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-2">Battle Records</p>
+        <div className="space-y-2">
+          {[
+            { value: "↓30%",  label: "Delivery Time",  desc: "modular component architecture" },
+            { value: "↓15%",  label: "User Drop-offs", desc: "AI auto-followups" },
+            { value: "8-10h", label: "Saved / Week",   desc: "LLM workflow automation" },
+            { value: "300+",  label: "Queries Solved", desc: "React & JS teaching assistant" },
+          ].map(({ value, label, desc }) => (
+            <div key={label} className="flex items-baseline gap-2">
+              <span className="text-[12px] font-bold text-terminal-green tabular-nums w-10 shrink-0">
+                {value}
+              </span>
+              <span className="text-[10px] text-terminal-white/70 uppercase tracking-wider shrink-0">
+                {label}
+              </span>
+              <span className="text-[10px] text-terminal-muted truncate">· {desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* <div className="border-t border-terminal-white/10" /> */}
+
+      {/* Recognition */}
+      {/* <div className="flex items-center justify-between">
+        <span className="text-[9px] text-terminal-muted uppercase tracking-widest">Recognition</span>
+        <span className="text-[9px] border border-terminal-green/40 px-2 py-0.5 text-terminal-green/80 uppercase tracking-wider">
+          ★ Employee of Month
+        </span>
+      </div> */}
     </div>
   );
 }

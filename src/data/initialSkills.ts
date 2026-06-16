@@ -131,14 +131,14 @@ export const INITIAL_SKILLS: Skill[] = [
   {
     id: "skill-claude",
     name: "Claude Code",
-    level: "LVL. 95",
+    level: "LVL. 97",
     category: ["tools"],
-    icon: "CL",
+    icon: "CC",
   },
   {
     id: "skill-cursor",
     name: "Cursor IDE",
-    level: "LVL. 99",
+    level: "LVL. 95",
     category: ["tools"],
     icon: "CI",
     highlight: true,

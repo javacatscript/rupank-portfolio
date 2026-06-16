@@ -555,39 +555,52 @@ function WorldMapPanel() {
 const CAREER_START = new Date("2022-12-01").getTime();
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 
+const ABILITIES = [
+  { label: "PERFORMANCE", value: 95 },
+  { label: "AI / LLM OPS", value: 90 },
+  { label: "ARCHITECTURE", value: 88 },
+  // { label: "DX TOOLING",   value: 75 },
+] as const;
+
+const ACHIEVEMENTS = [
+  "LCP ↓ 40%",
+  "SALES ↑ 25%",
+  "EMP_OF_MONTH",
+  "4.9★ RATING",
+  "300+ PROBLEMS SOLVED",
+] as const;
+
 function PlayerStatsPanel() {
   const [stats, setStats] = useState<{ level: number; pct: number; years: number }>(
     { level: 3, pct: 0, years: 3 }
   );
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const years = (Date.now() - CAREER_START) / MS_PER_YEAR;
     const level = Math.floor(years);
     const target = Math.round((years - level) * 100);
-    // Animate the bar in from 0 toward the real progress value.
-    const timer = setTimeout(
-      () => setStats({ level, pct: target, years }),
-      400
-    );
+    const timer = setTimeout(() => {
+      setStats({ level, pct: target, years });
+      setMounted(true);
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="border-b-4 border-terminal-white p-6 box-retro bg-bg-primary/50">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xs font-bold uppercase tracking-wider text-terminal-green">
           Player Stats
         </h3>
         <svg width="12" height="12" viewBox="0 0 12 12" className="text-terminal-green">
-          <polygon
-            points="6,1 11,11 1,11"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+          <polygon points="6,1 11,11 1,11" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
       </div>
-      <div className="flex items-center gap-4 mb-2">
+
+      {/* Level + XP bar */}
+      <div className="flex items-center gap-4 mb-1">
         <div className="text-4xl sm:text-5xl font-black text-terminal-green leading-none">
           L{stats.level}
         </div>
@@ -609,6 +622,59 @@ function PlayerStatsPanel() {
       <p className="text-[10px] uppercase tracking-wider text-terminal-muted">
         Lvl {stats.level + 1} loading — {stats.pct}% to next year
       </p>
+
+      <div className="border-t border-terminal-white/10 my-4" />
+
+      {/* Class + current quest */}
+      {/* <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-0.5">Class</p>
+          <p className="text-[11px] font-bold text-terminal-green uppercase tracking-wider">
+            Frontend_Engineer
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-0.5">Current Quest</p>
+          <p className="text-[11px] text-terminal-white/80 uppercase tracking-wider">
+            The Squa.re · Kraya AI
+          </p>
+        </div>
+      </div> */}
+
+      {/* Ability bars */}
+      <div className="space-y-2 mb-4">
+        {ABILITIES.map(({ label, value }, i) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="text-[9px] uppercase tracking-wider text-terminal-muted shrink-0 w-[82px]">
+              {label}
+            </span>
+            <div className="flex-1 h-1.5 bg-terminal-white/10">
+              <div
+                className="h-full bg-terminal-green/80 transition-all duration-700 ease-out"
+                style={{ width: mounted ? `${value}%` : "0%", transitionDelay: `${i * 100}ms` }}
+              />
+            </div>
+            <span className="text-[9px] tabular-nums text-terminal-green/80 w-5 text-right shrink-0">
+              {value}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-terminal-white/10 mb-3" />
+
+      {/* Achievement badges */}
+      <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-2">Unlocked</p>
+      <div className="flex flex-wrap gap-1.5">
+        {ACHIEVEMENTS.map((badge) => (
+          <span
+            key={badge}
+            className="text-[9px] border border-terminal-green/30 px-1.5 py-0.5 text-terminal-green/80 uppercase tracking-wider"
+          >
+            {badge}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
