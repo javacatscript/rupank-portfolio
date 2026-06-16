@@ -13,6 +13,7 @@ import { ArcadeProvider } from "@/context/ArcadeContext";
 import { PortfolioAdminProvider } from "@/context/PortfolioAdminContext";
 import { SiteContentProvider } from "@/context/SiteContentContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LocationProvider } from "@/context/LocationContext";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -40,6 +41,7 @@ export default function Home() {
 
   return (
     <ThemeProvider>
+      <LocationProvider>
       <PortfolioAdminProvider>
         <SiteContentProvider>
           <ArcadeProvider>
@@ -56,6 +58,7 @@ export default function Home() {
           </ArcadeProvider>
         </SiteContentProvider>
       </PortfolioAdminProvider>
+      </LocationProvider>
     </ThemeProvider>
   );
 }

@@ -6,6 +6,7 @@ import EditTrigger from "@/components/admin/EditTrigger";
 import HeroEditModal from "@/components/admin/HeroEditModal";
 import { useArcade } from "@/context/ArcadeContext";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useLocation } from "@/context/LocationContext";
 import {
   loadSavedGame,
   SNAKE_STORAGE_EVENT,
@@ -415,36 +416,7 @@ function StatusRow({
 }
 
 function WorldMapPanel({ highScore }: { highScore: number }) {
-  const [locationState, setLocationState] = useState<
-    "idle" | "locating" | "ready" | "denied" | "unavailable"
-  >("idle");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-
-  const locateUser = () => {
-    if (!("geolocation" in navigator)) {
-      setLocationState("unavailable");
-      return;
-    }
-
-    setLocationState("locating");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        setLocationState("ready");
-      },
-      () => {
-        setLocationState("denied");
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 120000,
-      },
-    );
-  };
+  const { locationState, coords, requestLocation: locateUser } = useLocation();
 
   const markerPosition = coords
     ? {
