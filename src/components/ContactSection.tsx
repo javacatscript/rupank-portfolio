@@ -374,11 +374,11 @@ function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className="block text-xs uppercase tracking-widest mb-2">
-          User Identification
+          Your Name
         </label>
         <div className="flex items-center border-b border-terminal-white/20">
           <span className="text-xs text-terminal-muted pr-2 shrink-0">
-            guest@_hellorupank:~$
+            $user_identification:
           </span>
           <input
             type="text"
@@ -394,15 +394,15 @@ function ContactForm() {
 
       <div>
         <label className="block text-xs uppercase tracking-widest mb-2">
-          Protocol Address
+          Your Email
         </label>
         <div className="flex items-center border-b border-terminal-white/20">
           <span className="text-xs text-terminal-muted pr-2 shrink-0">
-            mail_to:
+            $protocol_address:
           </span>
           <input
             type="email"
-            placeholder="active_email_address"
+            placeholder="enter_your_email"
             value={formData.email}
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
