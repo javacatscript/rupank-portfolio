@@ -224,7 +224,6 @@ function DiagnosticPanel({
   const [reducedMotion, setReducedMotion] = useState(false);
   const [networkType, setNetworkType] = useState("unknown");
   const [eventLog, setEventLog] = useState<string[]>(["System online"]);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -310,72 +309,17 @@ function DiagnosticPanel({
       <div className="space-y-2">
         <StatusRow label="Session" value={formatDuration(sessionSeconds)} />
         <StatusRow label="Arcade" value={isArcadeOpen ? "OPEN" : "IDLE"} />
-        <StatusRow label="CTA Interactions" value={String(diagnostics.totalClicks)} />
+        <StatusRow label="Connection" value={networkType.toUpperCase()} />
         <StatusRow label="Visibility" value={visibility.toUpperCase()} />
+        <StatusRow label="Play / Quest" value={`${diagnostics.playClicks} / ${diagnostics.questClicks}`} />
+        <StatusRow label="CTA Interactions" value={String(diagnostics.totalClicks)} />
+        <StatusRow label="Reduced Motion" value={reducedMotion ? "ENABLED" : "DISABLED"} />
       </div>
 
-      <button
-        type="button"
-        onClick={() => setShowAdvanced((value) => !value)}
-        className="mt-4 w-full border border-terminal-white/30 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-terminal-green hover:border-terminal-green/70 transition-colors"
-      >
-        {showAdvanced ? "Hide Advanced" : "Show Advanced"}
-      </button>
+      <div className="border-t border-terminal-white/10 mt-3" />
 
-      {showAdvanced ? (
-        <div className="mt-4 space-y-4">
-          <div className="space-y-2">
-            <StatusRow
-              label="Reduced Motion"
-              value={reducedMotion ? "ENABLED" : "DISABLED"}
-            />
-            <StatusRow label="Connection" value={networkType.toUpperCase()} />
-            <StatusRow
-              label="Play / Quest"
-              value={`${diagnostics.playClicks} / ${diagnostics.questClicks}`}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-terminal-green">
-              Quick Actions
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => jumpTo("projects")}
-                className="border border-terminal-white/30 px-2 py-1.5 text-[10px] font-mono uppercase hover:border-terminal-green/70 transition-colors"
-              >
-                Projects
-              </button>
-              <button
-                type="button"
-                onClick={() => jumpTo("experience")}
-                className="border border-terminal-white/30 px-2 py-1.5 text-[10px] font-mono uppercase hover:border-terminal-green/70 transition-colors"
-              >
-                Quest
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-terminal-green">
-              Event Log
-            </p>
-            <div className="space-y-1.5">
-              {eventLog.map((entry, index) => (
-                <p
-                  key={`${entry}-${index}`}
-                  className="text-[10px] font-mono uppercase text-terminal-white/80"
-                >
-                  [{index + 1}] {entry}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
+
   );
 }
 
@@ -664,7 +608,7 @@ function PlayerStatsPanel() {
       <div className="border-t border-terminal-white/10 mb-3" />
 
       {/* Achievement badges */}
-      <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-2">Unlocked</p>
+      {/* <p className="text-[9px] text-terminal-muted uppercase tracking-widest mb-2">Unlocked</p>
       <div className="flex flex-wrap gap-1.5">
         {ACHIEVEMENTS.map((badge) => (
           <span
@@ -674,7 +618,7 @@ function PlayerStatsPanel() {
             {badge}
           </span>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }
