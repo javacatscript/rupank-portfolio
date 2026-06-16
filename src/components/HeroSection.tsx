@@ -8,15 +8,17 @@ import { useArcade } from "@/context/ArcadeContext";
 import { useSiteContent } from "@/context/SiteContentContext";
 import { useLocation } from "@/context/LocationContext";
 import {
-  loadSavedGame,
-  SNAKE_STORAGE_EVENT,
-  type SavedGame,
-} from "@/lib/arcade/snake/storage";
+  ComposableMap,
+  Geographies,
+  Geography,
+  Graticule,
+  Marker,
+  Sphere,
+} from "react-simple-maps";
 
 export default function HeroSection() {
   const { content, updateContent } = useSiteContent();
   const { isOpen, open } = useArcade();
-  const [highScore, setHighScore] = useState(0);
   const [bootText, setBootText] = useState("");
   const [showContent, setShowContent] = useState(false);
   const [heroEditOpen, setHeroEditOpen] = useState(false);
@@ -89,25 +91,6 @@ export default function HeroSection() {
     return () => window.clearTimeout(timeout);
   }, [isOpen]);
 
-  useEffect(() => {
-    const sync = () => setHighScore(loadSavedGame().highScore);
-    sync();
-
-    const onSaveUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<SavedGame>;
-      setHighScore(customEvent.detail?.highScore ?? 0);
-    };
-
-    window.addEventListener(SNAKE_STORAGE_EVENT, onSaveUpdate as EventListener);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(
-        SNAKE_STORAGE_EVENT,
-        onSaveUpdate as EventListener,
-      );
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
 
   return (
     <section
@@ -209,7 +192,7 @@ export default function HeroSection() {
           }`}
         >
           <DiagnosticPanel isArcadeOpen={isOpen} diagnostics={diagnostics} />
-          <WorldMapPanel highScore={highScore} />
+          <WorldMapPanel />
           <PlayerStatsPanel />
         </div>
       </div>
@@ -415,26 +398,43 @@ function StatusRow({
   );
 }
 
-function WorldMapPanel({ highScore }: { highScore: number }) {
+function WorldMapPanel() {
   const { locationState, coords, requestLocation: locateUser } = useLocation();
+  const [mapScale, setMapScale] = useState(153);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([0, 0]);
 
-  const markerPosition = coords
-    ? {
-        left: `${((coords.lng + 180) / 360) * 100}%`,
-        top: `${((90 - coords.lat) / 180) * 100}%`,
-      }
-    : null;
+  useEffect(() => {
+    if (locationState !== "ready" || !coords) return;
 
-  const locationLabel =
-    locationState === "ready" && coords
-      ? `LAT ${coords.lat.toFixed(4)} | LNG ${coords.lng.toFixed(4)}`
-      : locationState === "locating"
-        ? "Locating..."
-        : locationState === "denied"
-          ? "Location access denied"
-          : locationState === "unavailable"
-            ? "Geolocation unavailable"
-            : "Location not requested";
+    const startScale = 153;
+    const startCenter: [number, number] = [0, 0];
+    const targetScale = 620;
+    const targetCenter: [number, number] = [coords.lng, coords.lat];
+    const duration = 1200;
+    const startTime = performance.now();
+    let rafId: number;
+
+    const animate = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setMapScale(startScale + (targetScale - startScale) * eased);
+      setMapCenter([
+        startCenter[0] + (targetCenter[0] - startCenter[0]) * eased,
+        startCenter[1] + (targetCenter[1] - startCenter[1]) * eased,
+      ]);
+      if (t < 1) rafId = requestAnimationFrame(animate);
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [locationState, coords]);
+
+  const statusLabel =
+    locationState === "denied"
+      ? "Location access denied"
+      : locationState === "unavailable"
+        ? "Geolocation unavailable"
+        : null;
 
   return (
     <div className="border-b-4 border-terminal-white p-6 box-retro bg-bg-primary/50 relative overflow-hidden">
@@ -443,62 +443,107 @@ function WorldMapPanel({ highScore }: { highScore: number }) {
           World Map
         </h3>
         <svg width="12" height="12" viewBox="0 0 12 12" className="text-terminal-green">
-          <rect
-            x="1"
-            y="1"
-            width="10"
-            height="10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+          <rect x="1" y="1" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
       </div>
+
       <div className="relative">
-        <div className="aspect-video bg-terminal-green/5 rounded-sm flex items-center justify-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="grid grid-cols-8 grid-rows-4 h-full w-full gap-px">
-              {[0.3, 0.15, 0.5, 0.22, 0.45, 0.12, 0.55, 0.38, 0.28, 0.48, 0.18, 0.42, 0.35, 0.52, 0.25, 0.4, 0.32, 0.58, 0.2, 0.47, 0.14, 0.53, 0.36, 0.44, 0.27, 0.5, 0.19, 0.41, 0.33, 0.56, 0.23, 0.46].map(
-                (opacity, i) => (
-                  <div
-                    key={i}
-                    className="bg-terminal-green/20"
-                    style={{ opacity }}
-                  />
-                )
-              )}
-            </div>
-          </div>
-          <div className="absolute w-2 h-2 bg-terminal-green rounded-full animate-pulse top-1/3 left-2/3" />
-          {markerPosition ? (
-            <div
-              className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-terminal-green bg-terminal-green/25 shadow-[0_0_0_3px_rgba(0,255,65,0.18)]"
-              style={markerPosition}
-              aria-label="Your approximate location"
-            />
-          ) : null}
-          <div className="relative flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-terminal-green rounded-full animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              LOCATING_SERVER...
-            </span>
-          </div>
-          <div className="absolute bottom-2 right-2 border border-terminal-green/50 bg-black/70 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-terminal-green">
-            HI SCORE: {highScore}
-          </div>
-        </div>
-        <div className="mt-3 space-y-2">
-          <button
-            type="button"
-            onClick={locateUser}
-            disabled={locationState === "locating"}
-            className="w-full border border-terminal-white/30 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-terminal-green transition-colors hover:border-terminal-green/70 disabled:opacity-60 disabled:cursor-not-allowed"
+        <div className="relative aspect-video bg-terminal-green/5 overflow-hidden border border-terminal-green/20">
+          <ComposableMap
+            projection="geoEquirectangular"
+            projectionConfig={{ scale: mapScale, center: mapCenter }}
+            style={{ width: "100%", height: "100%", display: "block" }}
           >
-            {locationState === "locating" ? "Locating..." : "Locate Me"}
-          </button>
-          <p className="text-[10px] font-mono uppercase tracking-wider text-terminal-white/75">
-            {locationLabel}
+            {/* Ocean sphere */}
+            <Sphere id="rsm-sphere" fill="transparent" stroke="var(--accent)" strokeWidth={0.3} strokeOpacity={0.15} />
+
+            {/* Lat/lng grid */}
+            <Graticule stroke="var(--accent)" strokeWidth={0.3} strokeOpacity={0.12} />
+
+            {/* Country shapes */}
+            <Geographies geography="/countries-110m.json">
+              {({ geographies }: { geographies: unknown[] }) =>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                geographies.map((geo: any) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill="rgb(var(--accent-rgb) / 0.13)"
+                    stroke="rgb(var(--accent-rgb) / 0.4)"
+                    strokeWidth={0.4}
+                    style={{
+                      default: { outline: "none" },
+                      hover:   { outline: "none" },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
+
+            {/* Location marker */}
+            {coords && locationState === "ready" && (
+              <Marker coordinates={[coords.lng, coords.lat]}>
+                {/* Ripple ring */}
+                <circle r="4" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity="0.5">
+                  <animate attributeName="r" from="2" to="12" dur="1.8s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" from="0.5" to="0" dur="1.8s" repeatCount="indefinite" />
+                </circle>
+                {/* Outer ring */}
+                <circle r="3" fill="none" stroke="var(--accent)" strokeWidth="0.8" opacity="0.8" />
+                {/* Center dot */}
+                <circle r="1.5" fill="var(--accent)" />
+                {/* Crosshair */}
+                <line x1="-8" y1="0" x2="-4" y2="0" stroke="var(--accent)" strokeWidth="0.6" opacity="0.6" />
+                <line x1="4"  y1="0" x2="8"  y2="0" stroke="var(--accent)" strokeWidth="0.6" opacity="0.6" />
+                <line x1="0" y1="-8" x2="0" y2="-4" stroke="var(--accent)" strokeWidth="0.6" opacity="0.6" />
+                <line x1="0" y1="4"  x2="0" y2="8"  stroke="var(--accent)" strokeWidth="0.6" opacity="0.6" />
+              </Marker>
+            )}
+          </ComposableMap>
+
+          {/* Scanline overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px)" }}
+          />
+
+          {/* Locating overlay */}
+          {locationState === "locating" && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex items-center gap-2 bg-bg-primary/80 px-3 py-1.5 border border-terminal-green/30">
+                <div className="w-1.5 h-1.5 bg-terminal-green rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-terminal-green">
+                  Acquiring signal...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Coords readout */}
+        {locationState === "ready" && coords && (
+          <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-terminal-green/80 tabular-nums">
+            LAT {coords.lat.toFixed(4)} | LNG {coords.lng.toFixed(4)}
           </p>
+        )}
+
+        <div className="mt-3 space-y-2">
+          {locationState !== "ready" && (
+            <button
+              type="button"
+              onClick={locateUser}
+              disabled={locationState === "locating"}
+              className="w-full border border-terminal-white/30 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-terminal-green transition-colors hover:border-terminal-green/70 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {locationState === "locating" ? "Locating..." : "Locate Me"}
+            </button>
+          )}
+          {statusLabel && (
+            <p className="text-[10px] font-mono uppercase tracking-wider text-terminal-white/75">
+              {statusLabel}
+            </p>
+          )}
         </div>
       </div>
     </div>
