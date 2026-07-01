@@ -2,7 +2,7 @@ import type { SiteContentBundle } from "@/types/siteContent";
 
 export const INITIAL_SITE_CONTENT: SiteContentBundle = {
   hero: {
-    name: "rupank joshi",
+    name: "rupank",
     tagline:
       "software dev; designing high-fidelity systems through low-fidelity constraints.",
   },
