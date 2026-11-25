@@ -21,6 +21,12 @@ export const SOCIAL_LINKS: SocialLink[] = [
     href: "https://linkedin.com/in/rupankjoshi",
   },
   {
+    id: "hashnode",
+    label: "HASHNODE",
+    handle: "@hellorupank",
+    href: "https://hashnode.com/@hellorupank",
+  },
+  {
     id: "email",
     label: "EMAIL",
     handle: "hellorupank@gmail.com",

@@ -6,7 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "_hellorupank",
   description:
-    "Frontend Engineer with 3+ years of experience. Building high-fidelity experiences through low-fidelity constraints.",
+    "Software Engineer. Building high-fidelity experiences through low-fidelity constraints.",
 };
 
 export default function RootLayout({

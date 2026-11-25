@@ -6,6 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import PlayerProfileSection from "@/components/PlayerProfileSection";
 import SkillsSection from "@/components/SkillsSection";
 import ExperienceSection from "@/components/ExperienceSection";
+import CertificationsSection from "@/components/CertificationsSection";
 import ProjectsSection from "@/components/projects/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
@@ -51,6 +52,7 @@ export default function Home() {
               <PlayerProfileSection />
               <SkillsSection />
               <ExperienceSection />
+              <CertificationsSection />
               <ProjectsSection />
               <ContactSection />
             </main>

@@ -20,6 +20,9 @@ import type { Skill, SkillFilterCategory, SkillFormData } from "@/types/skill";
 
 // Meta-competencies that span the skill list — curated from real specialties
 // (Core Web Vitals work, App Router SSR/SSG, OpenAI/Gemini integrations).
+// Skill tiles shown on phones before "Show all" (3 columns x 4 rows).
+const MOBILE_SKILL_LIMIT = 12;
+
 const coreAttributes = [
   { name: "Web_Vitals_Optimization", value: 95 },
   { name: "SSR_SSG_Architecture", value: 92 },
@@ -42,6 +45,8 @@ export default function SkillsSection() {
   const [editingSkill, setEditingSkill] = useState<Skill | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<Skill | null>(null);
   const [syncState, setSyncState] = useState<"idle" | "syncing" | "done">("idle");
+  // Mobile only: the grid is clamped to MOBILE_SKILL_LIMIT until expanded.
+  const [showAllMobile, setShowAllMobile] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -157,12 +162,12 @@ export default function SkillsSection() {
               <h3 className="text-terminal-green text-xs font-bold uppercase tracking-wider pb-3 mb-3 border-b border-terminal-white/20">
                 Filter_Types
               </h3>
-              <div className="space-y-1">
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-1 lg:overflow-visible lg:pb-0">
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`w-full flex items-center justify-between px-2 py-1.5 text-xs tracking-wider transition-all duration-150 ${
+                    className={`shrink-0 lg:w-full flex items-center justify-between gap-2 px-2 py-1.5 text-xs tracking-wider transition-all duration-150 border border-terminal-white/10 lg:border-transparent ${
                       activeCategory === cat.id
                         ? "text-terminal-green bg-terminal-green/10"
                         : "text-terminal-muted hover:text-terminal-white opacity-60 hover:opacity-100"
@@ -206,16 +211,21 @@ export default function SkillsSection() {
           </div>
 
           <div className="flex-1">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {filteredSkills.map((skill) => (
-                <div key={skill.id} className="relative group/skill">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+              {filteredSkills.map((skill, index) => (
+                <div
+                  key={skill.id}
+                  className={`relative group/skill ${
+                    !showAllMobile && index >= MOBILE_SKILL_LIMIT ? "hidden md:block" : ""
+                  }`}
+                >
                   <button
                     onClick={() =>
                       setSelectedSkill(
                         selectedSkill?.id === skill.id ? null : skill
                       )
                     }
-                    className={`w-full bg-bg-card border p-3 sm:p-4 flex flex-col items-center text-center transition-all duration-200 hover:border-terminal-green/60 ${
+                    className={`w-full bg-bg-card border p-2 sm:p-4 flex flex-col items-center text-center transition-all duration-200 hover:border-terminal-green/60 ${
                       selectedSkill?.id === skill.id
                         ? "border-terminal-green bg-terminal-green/5"
                         : skill.highlight
@@ -223,10 +233,10 @@ export default function SkillsSection() {
                           : "border-terminal-white/10"
                     }`}
                   >
-                    <div className="text-xl sm:text-2xl mb-2 h-8 flex items-center justify-center text-terminal-green/70 group-hover/skill:text-terminal-green transition-colors">
+                    <div className="text-lg sm:text-2xl mb-1 sm:mb-2 h-6 sm:h-8 flex items-center justify-center text-terminal-green/70 group-hover/skill:text-terminal-green transition-colors">
                       {skill.icon}
                     </div>
-                    <span className="text-xs text-terminal-muted tracking-wider mb-1 truncate w-full">
+                    <span className="text-[11px] sm:text-xs text-terminal-muted tracking-wide sm:tracking-wider mb-1 truncate w-full">
                       {skill.name}
                     </span>
                     <span
@@ -275,6 +285,18 @@ export default function SkillsSection() {
               )}
             </div>
 
+            {filteredSkills.length > MOBILE_SKILL_LIMIT && (
+              <button
+                type="button"
+                onClick={() => setShowAllMobile((v) => !v)}
+                className="md:hidden mt-3 w-full border border-terminal-green/40 text-terminal-green text-xs font-bold uppercase tracking-widest py-2.5 hover:bg-terminal-green/10 transition-colors"
+              >
+                {showAllMobile
+                  ? "Show less"
+                  : `Show all ${filteredSkills.length} skills`}
+              </button>
+            )}
+
             {filteredSkills.length === 0 && (
               <p className="text-terminal-muted text-sm tracking-wider mt-4 text-center">
                 No skills in this category.
@@ -309,7 +331,7 @@ export default function SkillsSection() {
                       <div className="text-xs text-terminal-muted tracking-wider">
                         {gear.name}
                       </div>
-                      <div className="text-[10px] text-terminal-muted/60 tracking-wider">
+                      <div className="text-[10px] text-terminal-muted/80 tracking-wider">
                         {gear.type}
                       </div>
                     </div>

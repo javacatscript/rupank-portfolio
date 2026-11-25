@@ -494,9 +494,9 @@ function WorldMapPanel() {
   );
 }
 
-// First professional role (Teaching Assistant @ Coding Ninjas, Dec 2022) — the
-// Player Stats level is years-of-experience, so it ticks up on its own over time.
-const CAREER_START = new Date("2022-12-01").getTime();
+// Career anchor — the Player Stats level is years-of-experience (4 yrs as of
+// Nov 2026), so it ticks up on its own over time.
+const CAREER_START = new Date("2022-11-01").getTime();
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 
 const ABILITIES = [
@@ -516,7 +516,7 @@ const ACHIEVEMENTS = [
 
 function PlayerStatsPanel() {
   const [stats, setStats] = useState<{ level: number; pct: number; years: number }>(
-    { level: 3, pct: 0, years: 3 }
+    { level: 4, pct: 0, years: 4 }
   );
   const [mounted, setMounted] = useState(false);
 

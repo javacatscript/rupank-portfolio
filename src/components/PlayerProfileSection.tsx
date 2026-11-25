@@ -4,10 +4,10 @@
 // experience so the "player profile" stays factual under the RPG framing.
 
 const CHARACTER_STATS = [
-  { label: "CLASS", value: "Frontend Engineer" },
-  { label: "LEVEL", value: "3+ yrs in production" },
+  { label: "CLASS", value: "Software Engineer" },
+  { label: "LEVEL", value: "4+ years" },
   { label: "BASE", value: "New Delhi, IN" },
-  { label: "GUILD", value: "The Squa.re · Kraya AI" },
+  { label: "GUILD", value: "The Squa.re" },
   { label: "ORIGIN", value: "Earth" },
   { label: "STATUS", value: "Ready to engage" },
 ];
@@ -28,7 +28,7 @@ export default function PlayerProfileSection() {
             Player Profile
           </span>
           <span className="h-px flex-1 bg-terminal-white/10" />
-          <span className="text-[10px] uppercase tracking-widest text-terminal-muted/60">
+          <span className="text-[10px] uppercase tracking-widest text-terminal-muted/80">
             character_sheet.dat
           </span>
         </div>
@@ -40,9 +40,8 @@ export default function PlayerProfileSection() {
               <span className="text-terminal-muted">&gt; whoami</span>
             </p>
             <p className="text-base sm:text-lg leading-relaxed text-terminal-white/90">
-              Software Engineer with{" "}
-              <span className="text-terminal-green">3+ years</span> building
-              high-performance, scalable web apps in{" "}
+              Software Engineer building high-performance, scalable web apps
+              in{" "}
               <span className="text-terminal-green">
                 React, Next.js, and TypeScript
               </span>

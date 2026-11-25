@@ -299,11 +299,7 @@ function QuestCard({
         <div className="flex-1">
           <div className="border-l-2 p-4 sm:p-6 bg-bg-card box-retro border-terminal-white/20">
             <p
-              className={`text-sm leading-relaxed ${
-                quest.status === "active"
-                  ? "text-terminal-muted"
-                  : "text-terminal-muted/70"
-              }`}
+              className="text-sm leading-relaxed text-terminal-muted"
             >
               {quest.description}
             </p>
@@ -370,7 +366,7 @@ function SkillTreeTeaser({ skills }: { skills: SkillTreeEntry[] }) {
       </div>
       <div className="space-y-3">
         {skills.length === 0 && (
-          <p className="text-terminal-muted/50 text-xs">Loading skill tree…</p>
+          <p className="text-terminal-muted text-xs">Loading skill tree…</p>
         )}
         {skills.map((skill) => (
           <div key={skill.name}>

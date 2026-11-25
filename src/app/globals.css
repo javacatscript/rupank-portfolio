@@ -23,7 +23,7 @@ summary {
   --color-terminal-green: var(--accent);
   --color-terminal-green-dim: rgb(var(--accent-rgb) / 0.6);
   --color-terminal-white: #e5e7eb;
-  --color-terminal-muted: #6b7280;
+  --color-terminal-muted: #9ca3af;
   --color-accent-gold: #fbbf24;
   --color-accent-red: #ef4444;
   --font-mono: "IBM Plex Mono", "Liberation Mono", monospace;

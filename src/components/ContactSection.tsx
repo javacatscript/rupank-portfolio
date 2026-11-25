@@ -418,7 +418,7 @@ function ContactForm() {
         </label>
         <div className="border border-terminal-white/10">
           <div className="px-3 py-2 border-b border-dashed border-terminal-white/10">
-            <p className="text-[10px] text-terminal-muted/50 tracking-wider">
+            <p className="text-[10px] text-terminal-muted/80 tracking-wider">
               # ENTER_COMMAND: mail -s &apos;transmission&apos;
             </p>
           </div>

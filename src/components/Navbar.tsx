@@ -69,7 +69,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
                     {link.label}
                   </span>
                   {link.sub && (
-                    <span className="mt-1 text-[9px] tracking-[0.2em] lowercase text-terminal-muted/40 group-hover:text-terminal-muted/70 transition-colors">
+                    <span className="mt-1 text-[11px] tracking-[0.15em] lowercase text-terminal-white/60 group-hover:text-terminal-white/90 transition-colors">
                       {link.sub}
                     </span>
                   )}
@@ -160,7 +160,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
                     {link.label}
                   </span>
                   {link.sub && (
-                    <span className="text-[10px] tracking-[0.2em] lowercase text-terminal-muted/40">
+                    <span className="text-[11px] tracking-[0.15em] lowercase text-terminal-white/60">
                       {link.sub}
                     </span>
                   )}
